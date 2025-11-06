@@ -65,7 +65,10 @@ function Login() {
           </h2>
 
           {error && (
-            <div className="bg-red-500 text-white text-sm p-2 rounded">
+            <div
+              id="error-message"
+              className="bg-red-500 text-white text-sm p-2 rounded"
+            >
               {error}
             </div>
           )}
@@ -81,6 +84,8 @@ function Login() {
                 placeholder="you@example.com"
                 required
                 className="p-3 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:border-[#3B82F6] placeholder-gray-400 text-gray-100"
+                id="email"
+                data-testid="email-input"
               />
             </div>
 
@@ -94,6 +99,8 @@ function Login() {
                 placeholder="********"
                 required
                 className="p-3 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:border-[#3B82F6] placeholder-gray-400 text-gray-100"
+                id="password"
+                data-testid="password-input"
               />
             </div>
 
