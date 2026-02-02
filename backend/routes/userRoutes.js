@@ -17,7 +17,7 @@ router.post("/login", loginUser);
 
 // Private (Authenticated)
 router.get("/profile", protect, getUserProfile);
-router.put("/profile", protect, updateUserProfile);
+router.post("/profile", protect, updateUserProfile);
 
 // Admin-only
 router.get("/", protect, authorize("admin"), getAllUsers);

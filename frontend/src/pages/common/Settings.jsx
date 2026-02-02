@@ -8,7 +8,7 @@ function Settings() {
   const [formData, setFormData] = useState({
     name: user?.personalInfo.name || "",
     email: user?.email || "",
-    contact: user?.personalInfo?.contact || "",
+    contact: { phone: user?.personalInfo?.contact || "" },
     address: user?.personalInfo?.address || "",
     notifications: true,
   });
@@ -24,6 +24,13 @@ function Settings() {
   // 🔹 Handle input changes
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    if (name === "contact") {
+      setFormData((prev) => ({
+        ...prev,
+        contact: { phone: value },
+      }));
+      return;
+    }
     setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
@@ -42,7 +49,7 @@ function Settings() {
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/api/users/profile`,
         {
-          method: "PUT",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${user?.token}`,
@@ -116,9 +123,9 @@ function Settings() {
               <div>
                 <label className="block text-gray-400 mb-1">Contact</label>
                 <input
-                  type="text"
+                  type="number"
                   name="contact"
-                  value={formData.contact}
+                  value={formData.contact.phone}
                   onChange={handleChange}
                   className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none"
                 />

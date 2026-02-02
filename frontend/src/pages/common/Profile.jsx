@@ -41,7 +41,7 @@ function Profile() {
     try {
       setLoading(true);
       const res = await fetch(`${API_URL}/api/users/profile`, {
-        method: "PUT",
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${user?.token}`,
