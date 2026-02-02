@@ -6,9 +6,9 @@ import { useUserContext } from "../../context/UserContext";
 function Settings() {
   const { user, updateUser, logoutUser } = useUserContext();
   const [formData, setFormData] = useState({
-    name: user?.personalInfo.name || "",
+    name: user?.personalInfo?.name || user.name || "",
     email: user?.email || "",
-    contact: { phone: user?.personalInfo?.contact || "" },
+    contact: { phone: user?.personalInfo?.contact || user.contact.phone || "" },
     address: user?.personalInfo?.address || "",
     notifications: true,
   });

@@ -35,7 +35,8 @@ function Login() {
 
       if (user.role === "student") navigate("/student/dashboard");
       else if (user.role === "college") navigate("/college/dashboard");
-      else navigate("/admin/dashboard");
+      else if (user.role === "company") navigate("/company/dashboard");
+      else navigate("");
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.message || "Login failed");

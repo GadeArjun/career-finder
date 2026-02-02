@@ -44,7 +44,7 @@ function Header({ title }) {
             />
           </div>
           <span className="text-gray-200 text-sm font-medium hidden sm:block">
-            {user?.personalInfo?.name || "Guest User"}
+            {user?.personalInfo?.name || user.name || "Guest User"}
           </span>
         </Link>
 

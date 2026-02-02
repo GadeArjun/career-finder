@@ -62,6 +62,9 @@ import CollegeDetail from "./pages/College/CollegeDetail";
 import Courses from "./pages/College/Courses";
 import CourseDetail from "./pages/College/CourseDetail";
 import ManageCollege from "./pages/College/ManageCollege";
+import ManageCompany from "./pages/Company/ManageCompany";
+import CompanyDashboard from "./pages/Company/CompanyDashboard";
+import CompaniesList from "./pages/Company/CompaniesList";
 
 export default function App() {
   const { user } = useUserContext();
@@ -133,6 +136,25 @@ export default function App() {
 
         <Route
           path="/college/*"
+          element={
+            <ProtectedRoute>
+              <h1>Not Found</h1>
+            </ProtectedRoute>
+          }
+        />
+
+        {user && user.role === "company" && (
+          <Route path="/company" element={<Layout />}>
+            <Route path="dashboard" element={<CompanyDashboard />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="companys" element={<CompaniesList />} />
+            <Route path="companys/:id" element={<ManageCompany />} />
+            <Route path="settings" element={<Settings />} />
+          </Route>
+        )}
+
+        <Route
+          path="/company/*"
           element={
             <ProtectedRoute>
               <h1>Not Found</h1>

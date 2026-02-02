@@ -129,6 +129,7 @@ function Register() {
               >
                 <option value="student">Student</option>
                 <option value="college">College</option>
+                <option value="company">Company</option>
               </select>
             </div>
 

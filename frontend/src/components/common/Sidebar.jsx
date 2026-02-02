@@ -63,11 +63,29 @@ const Sidebar = () => {
     },
   ];
 
+  const companyMenuItems = [
+    { name: "Dashboard", icon: <Home size={20} />, path: "/company/dashboard" },
+    {
+      name: "Company",
+      icon: <Clipboard size={20} />,
+      path: "/company/companys",
+    },
+
+    { name: "My Profile", icon: <User size={20} />, path: "/company/profile" },
+    {
+      name: "Settings",
+      icon: <Settings size={20} />,
+      path: "/company/settings",
+    },
+  ];
+
   const menuItems =
     user.role === "student"
       ? studentMenuItems
       : user.role === "college"
       ? collegeMenuItems
+      : user.role === "company"
+      ? companyMenuItems
       : studentMenuItems;
 
   return (
