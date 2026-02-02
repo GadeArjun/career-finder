@@ -7,7 +7,7 @@ function Layout() {
     <div>
       <Sidebar />
       {/* Main Content */}
-      <main className="flex-1 bg-gray-100 overflow-auto min-h-screen">
+      <main className="flex-1 bg-gray-100 overflow-auto overflow-x-hidden min-h-screen">
         <Outlet />
       </main>
     </div>

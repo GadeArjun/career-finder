@@ -80,7 +80,7 @@ export const CollegeProvider = ({ children }) => {
   const updateCollege = async (collegeId, updates) => {
     try {
       const res = await fetch(`${API_URL}/api/college/${collegeId}`, {
-        method: "PUT",
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,

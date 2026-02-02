@@ -61,6 +61,7 @@ import Colleges from "./pages/College/Colleges";
 import CollegeDetail from "./pages/College/CollegeDetail";
 import Courses from "./pages/College/Courses";
 import CourseDetail from "./pages/College/CourseDetail";
+import ManageCollege from "./pages/College/ManageCollege";
 
 export default function App() {
   const { user } = useUserContext();
@@ -114,7 +115,7 @@ export default function App() {
             <Route path="dashboard" element={<CollegeDashboard />} />
             <Route path="profile" element={<Profile />} />
             <Route path="colleges" element={<Colleges />} />
-            <Route path="colleges/:id" element={<CollegeDetail />} />
+            <Route path="colleges/:id" element={<ManageCollege />} />
             <Route path="courses" element={<Courses />} />
             <Route path="course/:id" element={<CourseDetail />} />
 

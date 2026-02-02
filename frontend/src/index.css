@@ -1,3 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*  --- CSS UTILS (Tailwind Abstraction) --- */
+.input-field {
+  @apply w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-3 text-gray-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition placeholder-gray-600;
+}
+.label {
+  @apply text-xs font-bold text-gray-400 uppercase mb-1.5 block tracking-wide;
+}

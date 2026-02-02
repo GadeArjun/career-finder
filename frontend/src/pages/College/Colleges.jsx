@@ -9,6 +9,7 @@ import {
   MapPin,
   Globe,
   Mail,
+  Eye,
 } from "lucide-react";
 import Header from "../../components/common/Header";
 import { useUserContext } from "../../context/UserContext";
@@ -204,25 +205,26 @@ export default function Colleges() {
                 </p>
 
                 <div className="flex gap-3 mt-4">
-                  <button
+                  {/* <button
                     onClick={() => startEdit(college)}
                     className="bg-blue-600/30 hover:bg-blue-600/50 px-3 py-1 rounded flex items-center gap-1 text-sm"
                   >
                     <Edit3 size={14} /> Edit
-                  </button>
+                  </button> */}
+
+                  <Link
+                    to={`/college/colleges/${college._id}`}
+                    className="bg-green-600/30 hover:bg-green-600/50 px-3 py-1 rounded flex items-center gap-1 text-sm"
+                  >
+                    <Eye size={14} /> View / Edit
+                  </Link>
+
                   <button
                     onClick={() => handleDelete(college._id)}
                     className="bg-red-600/30 hover:bg-red-600/50 px-3 py-1 rounded flex items-center gap-1 text-sm"
                   >
                     <Trash2 size={14} /> Delete
                   </button>
-
-                  <Link
-                    to={`/college/colleges/${college._id}`}
-                    className="bg-green-600/30 hover:bg-green-600/50 px-3 py-1 rounded flex items-center gap-1 text-sm"
-                  >
-                    <Trash2 size={14} /> Details
-                  </Link>
                 </div>
               </div>
             ))}
@@ -236,7 +238,7 @@ export default function Colleges() {
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-gray-800 p-6 rounded-xl w-full max-w-lg shadow-lg border border-blue-500/20">
               <h3 className="text-xl font-semibold mb-4 text-blue-400">
-                {editingCollege ? "Edit College" : "Add New College"}
+                {editingCollege ? "Edit Basic Details" : "Add New College"}
               </h3>
 
               <div className="grid gap-3">

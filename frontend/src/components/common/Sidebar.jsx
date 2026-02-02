@@ -54,26 +54,12 @@ const Sidebar = () => {
       icon: <Clipboard size={20} />,
       path: "/college/colleges",
     },
-    {
-      name: "Recommendations",
-      icon: <Book size={20} />,
-      path: "/student/recommendations",
-    },
-    {
-      name: "Explore Courses / Colleges",
-      icon: <Compass size={20} />,
-      path: "/student/explore-courses-college",
-    },
-    {
-      name: "Guidance Resources & Learning Path",
-      icon: <GraduationCap size={20} />,
-      path: "/student/guidance-resources-path",
-    },
-    { name: "My Profile", icon: <User size={20} />, path: "/student/profile" },
+
+    { name: "My Profile", icon: <User size={20} />, path: "/college/profile" },
     {
       name: "Settings",
       icon: <Settings size={20} />,
-      path: "/student/settings",
+      path: "/college/settings",
     },
   ];
 
@@ -88,7 +74,7 @@ const Sidebar = () => {
     <>
       {/* ===== Sidebar Panel ===== */}
       {isOpen && (
-        <div className="fixed top-0 left-0 h-screen w-64 bg-gradient-to-b from-gray-950/95 via-gray-900/90 to-gray-800/95 backdrop-blur-md border-r border-blue-500/20 shadow-[4px_0_25px_rgba(0,0,0,0.4)] z-50 transition-all duration-500 overflow-y-auto">
+        <div className="fixed top-0 left-0 h-screen  w-64 bg-gradient-to-b from-gray-950/95 via-gray-900/90 to-gray-800/95 backdrop-blur-md border-r border-blue-500/20 shadow-[4px_0_25px_rgba(0,0,0,0.4)] z-50 transition-all duration-500 overflow-y-auto">
           {/* ===== Header ===== */}
           <div className="flex items-center justify-between p-4 border-b border-gray-700/50 bg-gradient-to-r from-blue-600/20 via-yellow-400/10 to-orange-400/10 shadow-md">
             <div className="flex items-center gap-2">
@@ -108,7 +94,7 @@ const Sidebar = () => {
           </div>
 
           {/* ===== Menu Items ===== */}
-          <ul className="mt-4 flex flex-col gap-1 px-3">
+          <ul className="mt-4 flex flex-col gap-1 px-3 min-h-[70%]">
             {menuItems.map((item) => (
               <li key={item.name} className="relative group">
                 <NavLink
