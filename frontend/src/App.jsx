@@ -59,12 +59,17 @@ import { useUserContext } from "./context/UserContext";
 import CollegeDashboard from "./pages/College/Dashboard";
 import Colleges from "./pages/College/Colleges";
 import CollegeDetail from "./pages/College/CollegeDetail";
-import Courses from "./pages/College/Courses";
-import CourseDetail from "./pages/College/CourseDetail";
+// import Courses from "./pages/College/Courses";
+// import CourseDetail from "./pages/College/CourseDetail";
 import ManageCollege from "./pages/College/ManageCollege";
 import ManageCompany from "./pages/Company/ManageCompany";
 import CompanyDashboard from "./pages/Company/CompanyDashboard";
 import CompaniesList from "./pages/Company/CompaniesList";
+import ManageJobs from "./pages/Job/ManageJobs";
+import CompanyJobsPage from "./pages/Job/CompanyjobsPage";
+import JobEditor from "./pages/Job/JobEditor";
+import CollegeCoursesPage from "./pages/Course/CollegeCoursesPage";
+import CourseEditor from "./pages/Course/CourseEditor";
 
 export default function App() {
   const { user } = useUserContext();
@@ -118,9 +123,15 @@ export default function App() {
             <Route path="dashboard" element={<CollegeDashboard />} />
             <Route path="profile" element={<Profile />} />
             <Route path="colleges" element={<Colleges />} />
+
+            <Route path="courses/:collegeId" element={<CollegeCoursesPage />} />
+
+            <Route path="course/add/:collegeId" element={<CourseEditor />} />
+            <Route path="course/edit/:courseId" element={<CourseEditor />} />
+
             <Route path="colleges/:id" element={<ManageCollege />} />
-            <Route path="courses" element={<Courses />} />
-            <Route path="course/:id" element={<CourseDetail />} />
+            {/* <Route path="courses" element={<Courses />} /> */}
+            {/* <Route path="course/:id" element={<CourseDetail />} /> */}
 
             <Route
               path="explore-courses-college"
@@ -148,6 +159,10 @@ export default function App() {
             <Route path="dashboard" element={<CompanyDashboard />} />
             <Route path="profile" element={<Profile />} />
             <Route path="companys" element={<CompaniesList />} />
+            {/* <Route path="jobs" element={<ManageJobs />} /> */}
+            <Route path="jobs/:companyId" element={<CompanyJobsPage />} />
+            <Route path="job/add/:companyId" element={<JobEditor />} />
+            <Route path="job/edit/:jobId" element={<JobEditor />} />
             <Route path="companys/:id" element={<ManageCompany />} />
             <Route path="settings" element={<Settings />} />
           </Route>

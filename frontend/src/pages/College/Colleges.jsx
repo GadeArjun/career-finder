@@ -10,6 +10,7 @@ import {
   Globe,
   Mail,
   Eye,
+  BookTextIcon,
 } from "lucide-react";
 import Header from "../../components/common/Header";
 import { useUserContext } from "../../context/UserContext";
@@ -217,6 +218,13 @@ export default function Colleges() {
                     className="bg-green-600/30 hover:bg-green-600/50 px-3 py-1 rounded flex items-center gap-1 text-sm"
                   >
                     <Eye size={14} /> View / Edit
+                  </Link>
+
+                  <Link
+                    to={`/college/courses/${college._id}`}
+                    className="bg-green-600/30 hover:bg-green-600/50 px-3 py-1 rounded flex items-center gap-1 text-sm"
+                  >
+                    <BookTextIcon size={14} /> View Courses
                   </Link>
 
                   <button

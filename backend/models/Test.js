@@ -1,44 +1,33 @@
 const mongoose = require("mongoose");
 
-/* ------------------------------------------------------------------
-   ✅ Competency Model Explanation (used below)
-   Each question will contribute scores to one or more of these dimensions:
-   - analytical
-   - verbal
-   - creative
-   - scientific
-   - social
-   - technical
-   ------------------------------------------------------------------ */
-
-/* --------------------- Option Schema --------------------- */
+/* =========================================================
+   🔹 OPTION SCHEMA
+========================================================= */
 const OptionSchema = new mongoose.Schema(
   {
-    text: {
+    text: { type: String, required: true, trim: true },
+
+    // Multiplier for scoring (for advanced scoring logic)
+    weight: { type: Number, default: 1 },
+
+    // Whether correct (for knowledge-based questions)
+    isCorrect: { type: Boolean, default: false },
+
+    // Personality influence (optional)
+    personalityImpact: {
       type: String,
-      required: true,
-      trim: true,
-    },
-    weight: {
-      type: Number,
-      default: 1, // optional scoring multiplier
-    },
-    isCorrect: {
-      type: Boolean,
-      default: false,
+      enum: ["Leader", "Creative", "Analytical", "Empathetic", "Practical"],
     },
   },
   { _id: false }
 );
 
-/* --------------------- Question Schema --------------------- */
+/* =========================================================
+   🔹 QUESTION SCHEMA
+========================================================= */
 const QuestionSchema = new mongoose.Schema(
   {
-    questionText: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+    questionText: { type: String, required: true, trim: true },
 
     type: {
       type: String,
@@ -46,13 +35,9 @@ const QuestionSchema = new mongoose.Schema(
       default: "MCQ",
     },
 
-    // The correct answer or expected value
     correctAnswer: mongoose.Schema.Types.Mixed,
 
-    marks: {
-      type: Number,
-      default: 1,
-    },
+    marks: { type: Number, default: 1 },
 
     difficulty: {
       type: String,
@@ -60,81 +45,92 @@ const QuestionSchema = new mongoose.Schema(
       default: "Medium",
     },
 
-    // 🔹 Competency Mapping (core of Option 3)
+    /* 🧠 CORE: Competency Contribution */
     competencies: {
-      analytical: { type: Number, default: 0 }, // logical reasoning, math
-      verbal: { type: Number, default: 0 }, // communication, comprehension
-      creative: { type: Number, default: 0 }, // imagination, design
-      scientific: { type: Number, default: 0 }, // biology, physics, reasoning
-      social: { type: Number, default: 0 }, // empathy, cooperation, behavior
-      technical: { type: Number, default: 0 }, // computer, engineering logic
+      analytical: { type: Number, default: 0 },
+      verbal: { type: Number, default: 0 },
+      creative: { type: Number, default: 0 },
+      scientific: { type: Number, default: 0 },
+      social: { type: Number, default: 0 },
+      technical: { type: Number, default: 0 },
     },
+
+    /* 🧩 Personality Trait Mapping */
+    personalityTraits: {
+      leadership: { type: Number, default: 0 },
+      teamwork: { type: Number, default: 0 },
+      riskTaking: { type: Number, default: 0 },
+      discipline: { type: Number, default: 0 },
+      adaptability: { type: Number, default: 0 },
+      creativity: { type: Number, default: 0 },
+    },
+
+    /* 🎯 Career Signals (Optional) */
+    careerTags: [
+      {
+        type: String,
+        enum: [
+          "Engineering",
+          "Medical",
+          "Design",
+          "Law",
+          "Management",
+          "Research",
+          "Entrepreneurship",
+          "Teaching",
+          "Defense",
+          "Civil Services",
+          "Media",
+          "AI",
+          "Finance",
+        ],
+      },
+    ],
 
     options: [OptionSchema],
 
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
+    isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
 
-/* --------------------- Test Schema --------------------- */
+/* =========================================================
+   🔹 TEST SCHEMA
+========================================================= */
 const TestSchema = new mongoose.Schema(
   {
-    title: {
+    title: { type: String, required: true, trim: true, unique: true },
+    description: String,
+
+    category: {
       type: String,
-      required: true,
-      trim: true,
-      unique: true,
+      enum: ["Aptitude", "Personality", "Technical", "Career Assessment"],
+      default: "Career Assessment",
     },
 
-    description: {
-      type: String,
-      trim: true,
-    },
+    duration: { type: Number, default: 30 },
+    questionCount: { type: Number, default: 25 },
+    totalMarks: { type: Number, default: 0 },
 
-    duration: {
-      type: Number,
-      default: 30, // minutes
-    },
+    randomizeQuestions: { type: Boolean, default: true },
 
-    questionCount: {
-      type: Number,
-      default: 25,
-    },
-
-    totalMarks: {
-      type: Number,
-      default: 0,
-    },
-
-    randomizeQuestions: {
-      type: Boolean,
-      default: true,
-    },
-
-    // Who created the test (admin or super user)
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
 
-    // Actual questions
     questions: {
       type: [QuestionSchema],
       validate: (arr) => arr.length > 0,
     },
 
-    // Whether this test is visible to users
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
+    isActive: { type: Boolean, default: true },
 
-    // ✅ Precomputed overall competency profile (average of all question mappings)
+    /* =====================================================
+       🧠 AGGREGATED PROFILES (AUTO-CALCULATED)
+    ===================================================== */
+
     competencyProfile: {
       analytical: { type: Number, default: 0 },
       verbal: { type: Number, default: 0 },
@@ -143,20 +139,33 @@ const TestSchema = new mongoose.Schema(
       social: { type: Number, default: 0 },
       technical: { type: Number, default: 0 },
     },
+
+    personalityProfile: {
+      leadership: { type: Number, default: 0 },
+      teamwork: { type: Number, default: 0 },
+      riskTaking: { type: Number, default: 0 },
+      discipline: { type: Number, default: 0 },
+      adaptability: { type: Number, default: 0 },
+      creativity: { type: Number, default: 0 },
+    },
+
+    dominantCareerSignals: [String], // auto-derived
+
+    analytics: {
+      timesTaken: { type: Number, default: 0 },
+      averageScore: { type: Number, default: 0 },
+    },
   },
   { timestamps: true }
 );
 
-/* ------------------------------------------------------------------
-   ⚙️ Pre-save Middleware:
-   Auto-calculate total marks and overall competency profile
-   ------------------------------------------------------------------ */
+/* =========================================================
+   ⚙️ PRE-SAVE AI AGGREGATION
+========================================================= */
 TestSchema.pre("save", function (next) {
-  // total marks
-  this.totalMarks = this.questions.reduce((sum, q) => sum + (q.marks || 1), 0);
+  this.totalMarks = this.questions.reduce((s, q) => s + (q.marks || 1), 0);
 
-  // aggregate competency profile
-  const totals = {
+  const compTotals = {
     analytical: 0,
     verbal: 0,
     creative: 0,
@@ -165,30 +174,49 @@ TestSchema.pre("save", function (next) {
     technical: 0,
   };
 
-  for (const q of this.questions) {
-    for (const key in totals) {
-      totals[key] += q.competencies[key] || 0;
-    }
-  }
+  const persTotals = {
+    leadership: 0,
+    teamwork: 0,
+    riskTaking: 0,
+    discipline: 0,
+    adaptability: 0,
+    creativity: 0,
+  };
+
+  const careerCount = {};
+
+  this.questions.forEach((q) => {
+    for (const k in compTotals) compTotals[k] += q.competencies[k] || 0;
+    for (const k in persTotals) persTotals[k] += q.personalityTraits[k] || 0;
+
+    q.careerTags?.forEach((tag) => {
+      careerCount[tag] = (careerCount[tag] || 0) + 1;
+    });
+  });
 
   const count = this.questions.length || 1;
-  for (const key in totals) {
-    this.competencyProfile[key] = parseFloat((totals[key] / count).toFixed(2));
-  }
+
+  for (const k in compTotals)
+    this.competencyProfile[k] = +(compTotals[k] / count).toFixed(2);
+
+  for (const k in persTotals)
+    this.personalityProfile[k] = +(persTotals[k] / count).toFixed(2);
+
+  this.dominantCareerSignals = Object.entries(careerCount)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map((e) => e[0]);
 
   next();
 });
 
-/* ------------------------------------------------------------------
-   🧠 Indexes
-   ------------------------------------------------------------------ */
+/* =========================================================
+   📊 INDEXES FOR AI MATCHING SPEED
+========================================================= */
 TestSchema.index({ title: "text", description: "text" });
+TestSchema.index({ category: 1 });
 TestSchema.index({ isActive: 1 });
-TestSchema.index({ "competencyProfile.analytical": 1 });
 TestSchema.index({ "competencyProfile.technical": 1 });
-TestSchema.index({ createdBy: 1 });
+TestSchema.index({ "competencyProfile.analytical": 1 });
 
-/* ------------------------------------------------------------------
-   ✅ Export Model
-   ------------------------------------------------------------------ */
 module.exports = mongoose.model("Test", TestSchema);

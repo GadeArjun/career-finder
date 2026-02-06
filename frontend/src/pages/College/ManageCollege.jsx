@@ -649,7 +649,7 @@ const ManageCollege = () => {
                   <label className="label">Minimum Fee</label>
                   <input
                     type="number"
-                    value={formData.feeRange.min}
+                    value={formData.feeRange?.min}
                     onChange={(e) =>
                       handleNestedChange("feeRange", "min", e.target.value)
                     }
@@ -660,7 +660,7 @@ const ManageCollege = () => {
                   <label className="label">Maximum Fee</label>
                   <input
                     type="number"
-                    value={formData.feeRange.max}
+                    value={formData.feeRange?.max}
                     onChange={(e) =>
                       handleNestedChange("feeRange", "max", e.target.value)
                     }

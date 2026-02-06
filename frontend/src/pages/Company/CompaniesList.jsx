@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from "react";
 import {
   Plus,
-  Edit3,
   Trash2,
   Eye,
   Search,
   MapPin,
   Briefcase,
-  Star,
   X,
   Loader2,
   Building2,
   Globe,
   CheckCircle2,
+  ArrowRight,
+  ExternalLink,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useCompanyContext } from "../../context/CompanyContext";
 import Header from "../../components/common/Header";
 
@@ -29,7 +29,6 @@ const CompaniesList = () => {
     addCompany,
   } = useCompanyContext();
 
-  // States
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,7 +43,6 @@ const CompaniesList = () => {
     fetchCompanies();
   }, []);
 
-  // --- HANDLERS ---
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     if (name.includes("location.")) {
@@ -77,9 +75,10 @@ const CompaniesList = () => {
     }
   };
 
-  const handleDelete = async (id, name) => {
+  const handleDelete = (e, id, name) => {
+    e.stopPropagation(); // Prevent card click navigation
     if (window.confirm(`Delete ${name}?`)) {
-      await deleteCompany(id);
+      deleteCompany(id);
     }
   };
 
@@ -90,61 +89,70 @@ const CompaniesList = () => {
   return (
     <div className="relative min-h-screen bg-gray-950 text-gray-100 p-6 font-poppins">
       <div className="max-w-7xl mx-auto">
-        {/* === HEADER === */}
         <Header title={"Companies"} />
 
-        {/* === SEARCH === */}
-        <div className="mb-8 mt-20 justify-center items-center flex gap-4">
-          <input
-            type="text"
-            placeholder="Search entities..."
-            className="md:max-w-3xl w-full bg-gray-900 border border-gray-800 rounded-2xl py-4 pl-12 pr-4 focus:border-blue-500 outline-none transition"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+        {/* === ACTIONS BAR === */}
+        <div className="mb-12 mt-24 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="relative w-full md:max-w-xl">
+            <Search
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"
+              size={20}
+            />
+            <input
+              type="text"
+              placeholder="Search companies by name..."
+              className="w-full bg-gray-900 border border-gray-800 rounded-2xl py-4 pl-12 pr-4 focus:border-blue-500 outline-none transition shadow-inner"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
 
           <button
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-2xl font-bold transition shadow-xl shadow-blue-900/40"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-2xl font-bold transition all duration-300 shadow-lg shadow-blue-900/30 whitespace-nowrap"
           >
-            <Plus size={20} /> New Company
+            <Plus size={20} /> Add New Entity
           </button>
         </div>
 
-        {/* === LIST === */}
-        <div className="space-y-3">
-          {loading ? (
-            <div className="py-20 text-center text-gray-500 animate-pulse">
-              Fetching records...
-            </div>
-          ) : (
-            filteredCompanies.map((company) => (
-              <CompanyRow
+        {/* === CARDS GRID === */}
+        {loading ? (
+          <div className="py-20 flex flex-col items-center justify-center text-gray-500 italic">
+            <Loader2 className="animate-spin text-blue-500 mb-4" size={40} />
+            Synchronizing data...
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredCompanies.map((company) => (
+              <CompanyCard
                 key={company._id}
                 company={company}
                 onDelete={handleDelete}
-                onView={() => navigate(`/company/companys/${company._id}`)}
+                // Update navigation to /company/jobs/:id
+                onView={() => navigate(`/company/jobs/${company._id}`)}
               />
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && filteredCompanies.length === 0 && (
+          <div className="text-center py-20 bg-gray-900/20 border border-dashed border-gray-800 rounded-3xl">
+            <Building2 className="mx-auto text-gray-700 mb-4" size={48} />
+            <p className="text-gray-500">No matching companies found.</p>
+          </div>
+        )}
       </div>
 
-      {/* === ADD COMPANY MODAL === */}
+      {/* === MODAL (Keep original logic) === */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-            onClick={() => setIsModalOpen(false)}
-          ></div>
-
-          {/* Modal Content */}
-          <div className="relative bg-gray-900 border border-gray-800 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-black/60">
+          <div className="relative bg-gray-900 border border-gray-800 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in duration-300">
+            {/* Modal Form Content ... same as your previous version */}
             <div className="p-8">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold flex items-center gap-2">
-                  <Building2 className="text-blue-500" /> Quick Add
+                  <Building2 className="text-blue-500" /> Quick Register
                 </h2>
                 <button
                   onClick={() => setIsModalOpen(false)}
@@ -153,90 +161,56 @@ const CompaniesList = () => {
                   <X />
                 </button>
               </div>
-
-              <form onSubmit={handleAddCompany} className="space-y-5">
-                <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase ml-1">
-                    Company Name
-                  </label>
-                  <input
-                    required
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    className="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 mt-1 focus:border-blue-500 outline-none"
-                    placeholder="e.g. Acme Corp"
-                  />
-                </div>
-
+              <form onSubmit={handleAddCompany} className="space-y-4">
+                {/* Inputs ... */}
+                <input
+                  required
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 outline-none focus:border-blue-500"
+                  placeholder="Company Name"
+                />
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase ml-1">
-                      Industry
-                    </label>
-                    <select
-                      name="industry"
-                      value={formData.industry}
-                      onChange={handleInputChange}
-                      className="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 mt-1 focus:border-blue-500 outline-none"
-                    >
-                      {[
-                        "Technology",
-                        "Finance",
-                        "Healthcare",
-                        "Education",
-                        "Manufacturing",
-                        "Startup",
-                      ].map((i) => (
+                  <select
+                    name="industry"
+                    value={formData.industry}
+                    onChange={handleInputChange}
+                    className="bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 outline-none"
+                  >
+                    {["Technology", "Finance", "Healthcare", "Startup"].map(
+                      (i) => (
                         <option key={i} value={i}>
                           {i}
                         </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase ml-1">
-                      City
-                    </label>
-                    <input
-                      name="location.city"
-                      value={formData.location.city}
-                      onChange={handleInputChange}
-                      className="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 mt-1 focus:border-blue-500 outline-none"
-                      placeholder="e.g. Mumbai"
-                    />
-                  </div>
+                      )
+                    )}
+                  </select>
+                  <input
+                    name="location.city"
+                    value={formData.location.city}
+                    onChange={handleInputChange}
+                    className="bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 outline-none"
+                    placeholder="City"
+                  />
                 </div>
-
-                <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase ml-1">
-                    Website URL
-                  </label>
-                  <div className="relative mt-1">
-                    <Globe
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600"
-                      size={16}
-                    />
-                    <input
-                      name="website"
-                      value={formData.website}
-                      onChange={handleInputChange}
-                      className="w-full bg-gray-950 border border-gray-800 rounded-xl px-10 py-3 focus:border-blue-500 outline-none"
-                      placeholder="https://company.com"
-                    />
-                  </div>
-                </div>
-
+                <input
+                  name="website"
+                  value={formData.website}
+                  onChange={handleInputChange}
+                  className="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 outline-none"
+                  placeholder="Website URL"
+                />
                 <button
                   disabled={isSubmitting}
-                  className="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-bold transition flex items-center justify-center gap-2 mt-4"
+                  className="w-full bg-blue-600 py-4 rounded-xl font-bold flex justify-center items-center gap-2"
                 >
                   {isSubmitting ? (
                     <Loader2 className="animate-spin" />
                   ) : (
                     <CheckCircle2 size={18} />
-                  )}
-                  Register Company
+                  )}{" "}
+                  Register
                 </button>
               </form>
             </div>
@@ -247,32 +221,58 @@ const CompaniesList = () => {
   );
 };
 
-// --- SUB-COMPONENT: ROW ---
-const CompanyRow = ({ company, onDelete, onView }) => (
-  <div className="group bg-gray-900/40 border border-gray-800 rounded-2xl p-4 flex items-center justify-between hover:bg-gray-900 transition">
-    <div className="flex items-center gap-4">
-      <div className="w-12 h-12 bg-blue-900/20 text-blue-500 rounded-xl flex items-center justify-center font-bold border border-blue-500/20">
-        {company.name[0]}
+// --- MODERN CARD COMPONENT ---
+const CompanyCard = ({ company, onDelete, onView }) => (
+  <div className="group bg-gray-900 border border-gray-800 rounded-3xl p-6 hover:border-blue-500/50 transition-all duration-300 shadow-xl flex flex-col justify-between h-full">
+    <div>
+      <div className="flex justify-between items-start mb-6">
+        <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-800 rounded-2xl flex items-center justify-center text-2xl font-black text-white shadow-lg group-hover:scale-110 transition duration-300">
+          {company.name[0]}
+        </div>
+        <button
+          onClick={(e) => onDelete(e, company._id, company.name)}
+          className="p-2 text-gray-600 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition"
+        >
+          <Trash2 size={18} />
+        </button>
       </div>
-      <div>
-        <h4 className="font-bold">{company.name}</h4>
-        <p className="text-xs text-gray-500">
-          {company.industry} • {company.location?.city || "Global"}
-        </p>
+
+      <h3 className="text-xl font-bold text-white group-hover:text-blue-400 transition mb-2">
+        {company.name}
+      </h3>
+
+      <div className="space-y-2 mb-6">
+        <div className="flex items-center gap-2 text-sm text-gray-400">
+          <Briefcase size={14} className="text-blue-500" />
+          <span>{company.industry}</span>
+        </div>
+        <div className="flex items-center gap-2 text-sm text-gray-400">
+          <MapPin size={14} className="text-blue-500" />
+          <span>{company.location?.city || "Remote"}</span>
+        </div>
       </div>
     </div>
 
-    <div className="flex items-center gap-2">
-      <button onClick={onView} className="p-2 hover:text-blue-400 transition">
-        <Eye size={18} />
+    <div className="flex items-center gap-3 mt-4">
+      <button
+        onClick={onView}
+        className="flex-1 bg-gray-800 hover:bg-blue-600 text-white py-3 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 group/btn"
+      >
+        View Jobs{" "}
+        <ArrowRight
+          size={16}
+          className="group-hover/btn:translate-x-1 transition"
+        />
       </button>
 
-      <button
-        onClick={() => onDelete(company._id, company.name)}
-        className="p-2 hover:text-red-500 transition"
-      >
-        <Trash2 size={18} />
-      </button>
+      {
+        <Link
+          to={`/company/companys/${company._id}`}
+          className="p-3 bg-gray-950 border border-gray-800 text-gray-500 hover:text-blue-400 rounded-xl transition"
+        >
+          <ExternalLink size={18} />
+        </Link>
+      }
     </div>
   </div>
 );

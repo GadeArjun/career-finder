@@ -179,18 +179,19 @@ function CollegeDashboard() {
               <SkeletonCard key={i} />
             ))}
           </div>
-        ) : error ? (
-          <div className="flex flex-col items-center justify-center p-12 text-red-400 bg-red-900/10 rounded-2xl border border-red-900/50">
-            <AlertCircle size={48} className="mb-4" />
-            <p>Error loading colleges: {error}</p>
-            <button
-              onClick={fetchColleges}
-              className="mt-4 text-sm underline hover:text-red-300"
-            >
-              Try Again
-            </button>
-          </div>
-        ) : collegesList?.length === 0 ? (
+        ) : // : error && collegesList?.length !== 0 ? (
+        //   <div className="flex flex-col items-center justify-center p-12 text-red-400 bg-red-900/10 rounded-2xl border border-red-900/50">
+        //     <AlertCircle size={48} className="mb-4" />
+        //     <p>Error loading colleges: {error}</p>
+        //     <button
+        //       onClick={fetchColleges}
+        //       className="mt-4 text-sm underline hover:text-red-300"
+        //     >
+        //       Try Again
+        //     </button>
+        //   </div>
+        // )
+        collegesList?.length === 0 ? (
           /* EMPTY STATE */
           <EmptyState onAdd={() => setShowAddCollege(true)} />
         ) : filteredColleges.length === 0 ? (

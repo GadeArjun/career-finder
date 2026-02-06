@@ -85,7 +85,7 @@ const COMPETENCIES = [
 const ManageCompany = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { addCompany, updateCompany, getCompanyById } = useCompanyContext();
+  const {  updateCompany, getCompanyById } = useCompanyContext();
 
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("basic");
