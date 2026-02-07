@@ -88,6 +88,20 @@ const QuestionSchema = new mongoose.Schema(
     ],
 
     options: [OptionSchema],
+    questionCategory: {
+      type: String,
+      enum: ["Aptitude", "Personality", "Technical", "Analytical", "Creative"],
+      required: true,
+      validate: {
+        validator: function (v) {
+          if (this.type === "MCQ" || this.type === "TrueFalse") {
+            return v.length >= 2;
+          }
+          return true;
+        },
+        message: "MCQ/TrueFalse must have at least 2 options",
+      },
+    },
 
     isActive: { type: Boolean, default: true },
   },

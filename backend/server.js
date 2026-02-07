@@ -10,6 +10,7 @@ const { learningPathRouter } = require("./routes/learningPathRoutes");
 const companyRouter = require("./routes/companyRoutes");
 const jobRouter = require("./routes/jobRoutes");
 const courseRoutes = require("./routes/course.routes");
+const Test = require("./models/Test");
 
 // Load env vars
 dotenv.config();
@@ -38,4 +39,6 @@ app.get(/.*/, (req, res) => {
 });
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, async () => {
+  console.log(`Server running on port ${PORT}`);
+});
