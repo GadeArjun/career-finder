@@ -11,6 +11,7 @@ const companyRouter = require("./routes/companyRoutes");
 const jobRouter = require("./routes/jobRoutes");
 const courseRoutes = require("./routes/course.routes");
 const Test = require("./models/Test");
+const testRoutes = require("./routes/test.routes");
 
 // Load env vars
 dotenv.config();
@@ -33,6 +34,7 @@ app.use("/api/learning-paths", learningPathRouter);
 app.use("/api/company", companyRouter);
 app.use("/api/job", jobRouter);
 app.use("/api/course", courseRoutes);
+app.use("/api/tests", testRoutes);
 
 app.get(/.*/, (req, res) => {
   return res.sendFile(path.join(__dirname, "public", "dist", "index.html"));

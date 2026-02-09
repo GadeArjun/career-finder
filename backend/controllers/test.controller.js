@@ -261,6 +261,51 @@ exports.getTestById = async (req, res) => {
   }
 };
 
+// get random test
+exports.getRandomTest = async (req, res) => {
+  try {
+    console.log("come here");
+    // 1️⃣ Pick ONE random active test
+    const randomTestArr = await Test.find({});
+    if (!randomTestArr.length) {
+      return res.status(404).json({ message: "No active test found" });
+    }
+    const test = randomTestArr[0];
+    let questions = [...test.questions];
+    // 2️⃣ Shuffle questions of THIS test only
+    for (let i = questions.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [questions[i], questions[j]] = [questions[j], questions[i]];
+    }
+    // 3️⃣ Limit if questionCount defined
+    if (test.questionCount && questions.length > test.questionCount) {
+      questions = questions.slice(0, test.questionCount);
+    }
+    // 4️⃣ Remove scoring data
+    const safeQuestions = questions.map((q) => ({
+      _id: q._id,
+      questionText: q.questionText,
+      type: q.type,
+      options: q.options.map((opt) => ({
+        text: opt.text,
+      })),
+      questionCategory: q.questionCategory,
+      difficulty: q.difficulty,
+    }));
+    res.json({
+      testId: test._id,
+      title: test.title,
+      description: test.description,
+      duration: test.duration,
+      totalQuestions: safeQuestions.length,
+      questions: safeQuestions,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 /* =========================================================
    ❌ DELETE TEST
 ========================================================= */

@@ -12,7 +12,7 @@ exports.protect = async (req, res, next) => {
   }
 
   if (!token) {
-    return res.redirected("/");
+    return res.redirect("/");
   }
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
