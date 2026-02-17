@@ -1,4 +1,6 @@
+const TestResult = require("../models/TestResult");
 const Test = require("../models/Test");
+const { generateFullRecommendations } = require("./recommendationEngine");
 
 /* =========================================================
    🧠 CREATE TEST CONTROLLER
@@ -264,34 +266,45 @@ exports.getTestById = async (req, res) => {
 // get random test
 exports.getRandomTest = async (req, res) => {
   try {
-    console.log("come here");
-    // 1️⃣ Pick ONE random active test
-    const randomTestArr = await Test.find({});
+    // 1️⃣ Pick ONE truly random active test using MongoDB aggregation
+    const randomTestArr = await Test.aggregate([
+      { $match: { isActive: true } }, // Only get active tests
+      { $sample: { size: 1 } }, // Pick 1 random document
+    ]);
+
     if (!randomTestArr.length) {
       return res.status(404).json({ message: "No active test found" });
     }
+
     const test = randomTestArr[0];
     let questions = [...test.questions];
-    // 2️⃣ Shuffle questions of THIS test only
+
+    // 2️⃣ Fisher-Yates Shuffle for the questions
     for (let i = questions.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [questions[i], questions[j]] = [questions[j], questions[i]];
     }
-    // 3️⃣ Limit if questionCount defined
-    if (test.questionCount && questions.length > test.questionCount) {
-      questions = questions.slice(0, test.questionCount);
-    }
-    // 4️⃣ Remove scoring data
+
+    // 3️⃣ Limit if questionCount is defined (e.g., test has 50 questions but you only want 25)
+    // if (test.questionCount && questions.length > test.questionCount) {
+    //   questions = questions.slice(0, test.questionCount);
+    // }
+
+    // 4️⃣ Sanitize data: Remove correct answers/weights before sending to frontend
     const safeQuestions = questions.map((q) => ({
       _id: q._id,
       questionText: q.questionText,
       type: q.type,
+      // We only send the text, hiding 'isCorrect', 'weight', and 'personalityImpact'
       options: q.options.map((opt) => ({
         text: opt.text,
+        // _id: opt._id // Include if you need to track choice by ID
       })),
       questionCategory: q.questionCategory,
       difficulty: q.difficulty,
     }));
+
+    // 5️⃣ Send response
     res.json({
       testId: test._id,
       title: test.title,
@@ -301,7 +314,7 @@ exports.getRandomTest = async (req, res) => {
       questions: safeQuestions,
     });
   } catch (err) {
-    console.error(err);
+    console.error("Error fetching random test:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -332,5 +345,90 @@ exports.deleteTest = async (req, res) => {
     res.json({ success: true, message: "Test deleted successfully" });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// submit test and check the
+
+exports.submitTestResult = async (req, res) => {
+  try {
+    const { testId, answers } = req.body; // 'answers' is the object from your previous prompt
+    const userId = req.user.id; // Obtained from your auth middleware
+
+    // 1. Fetch the master test to verify correct answers and competencies
+    const masterTest = await Test.findById(testId);
+    if (!masterTest) {
+      return res.status(404).json({ message: "Master test not found" });
+    }
+
+    const responses = [];
+
+    // 2. Map the master questions to the user's submissions
+    masterTest.questions.forEach((question) => {
+      const qId = question._id.toString();
+      const userSubmission = answers[qId];
+
+      if (userSubmission) {
+        // Check correctness (handling both string and mixed types)
+        const isCorrect =
+          String(question.correctAnswer) === String(userSubmission.answer);
+
+        // Calculate marks for this question
+        const marksObtained = isCorrect ? question.marks || 1 : 0;
+
+        // Build the response object for this specific question
+        responses.push({
+          questionId: question._id,
+          selectedOption: userSubmission.answer,
+          isCorrect: isCorrect,
+          marksObtained: marksObtained,
+          // Only pass competency points if they got it right (standard logic)
+          // or pass raw values if you want to track "intended" vs "demonstrated"
+          competencies: isCorrect
+            ? question.competencies
+            : {
+                analytical: 0,
+                verbal: 0,
+                creative: 0,
+                scientific: 0,
+                social: 0,
+                technical: 0,
+              },
+        });
+      }
+    });
+
+    // 3. Create the TestResult document
+    // The pre-save hook in your schema will automatically calculate:
+    // totalScore, totalPossible, percentage, and competencyScores
+    const newResult = new TestResult({
+      userId,
+      testId,
+      responses,
+      durationTaken: req.body.durationTaken || 0, // pass from frontend timer
+    });
+
+    await newResult.save();
+
+    const recommendation = await generateFullRecommendations({
+      userId,
+      testResult: newResult,
+    });
+
+    // 4. Return the computed data (calculated by your pre-save hook)
+
+    res.status(201).json({
+      success: true,
+      message: "Assessment completed successfully",
+      result: {
+        totalScore: newResult.totalScore,
+        percentage: newResult.percentage,
+        competencyProfile: newResult.competencyScores,
+      },
+      recommendation,
+    });
+  } catch (error) {
+    console.error("Submission Error:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };

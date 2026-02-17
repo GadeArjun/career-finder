@@ -41,6 +41,7 @@ function AptitudeTest() {
         );
         const data = res.data;
         setTest(data);
+        console.log(data);
         // Set timer based on API duration (convert minutes to seconds)
         setTimeRemaining(data.duration * 60);
         setLoading(false);
@@ -110,8 +111,15 @@ function AptitudeTest() {
 
   const handleAutoSubmit = () => {
     setTestCompleted(true);
-    // You could trigger the submitTest API call automatically here
   };
+
+  // submit test
+  useEffect(() => {
+    if (testCompleted) {
+      submitTest();
+      console.log("submit");
+    }
+  }, [testCompleted]);
 
   const submitTest = async () => {
     const submission = {
@@ -123,9 +131,19 @@ function AptitudeTest() {
     console.log("FINAL SUBMISSION:", submission);
 
     // Logic to send to backend:
-    // await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/tests/submit`, submission, { headers: ... });
+    const res = await axios.post(
+      `${import.meta.env.VITE_BACKEND_URL}/api/tests/submit`,
+      submission,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-    navigate("/student/recommendations");
+    console.log(res.data);
+    // navigate("/student/recommendations");
   };
 
   if (loading)

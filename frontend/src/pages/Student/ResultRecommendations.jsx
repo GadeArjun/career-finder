@@ -1,5 +1,5 @@
 // pages/Student/ResultRecommendations.jsx
-import React from "react";
+import React, { useEffect } from "react";
 import Header from "../../components/common/Header";
 import {
   BarChart,
@@ -10,9 +10,27 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Download, BookOpen } from "lucide-react";
+import axios from "axios";
 
 function ResultRecommendations() {
   const overallScore = 82;
+
+  const fetchRecommendation = async () => {
+    const res = await axios.get(
+      `${import.meta.env.VITE_BACKEND_URL}/api/recommendation/my`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    );
+    const data = res.data;
+    console.log(data);
+  };
+
+  useEffect(() => {
+    fetchRecommendation();
+  }, []);
 
   const sectionPerformance = [
     { section: "Logical Reasoning", score: 85 },

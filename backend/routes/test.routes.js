@@ -3,6 +3,7 @@ const router = express.Router();
 const { protect, authorize } = require("../middleware/auth");
 const testController = require("../controllers/test.controller");
 
+router.post("/submit", protect, testController.submitTestResult);
 router.post("/", protect, testController.createTest);
 router.post("/:id", protect, testController.updateTest);
 router.delete("/:id", protect, testController.deleteTest);

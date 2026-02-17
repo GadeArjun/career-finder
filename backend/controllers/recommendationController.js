@@ -4,8 +4,7 @@ const TestResult = require("../models/TestResult");
 const Course = require("../models/Course");
 const College = require("../models/College");
 const Recommendation = require("../models/Recommendation");
-const User = require("../models/User");
-const { default: PQueue } = require("p-queue"); // optional for rate-limiting heavy jobs
+const Job = require("../models/Job");
 
 // Optional: Redis cache (uncomment if you install redis client and provide client)
 // const redisClient = require("../lib/redisClient");
@@ -315,36 +314,77 @@ exports.recommendForUser = async (req, res) => {
  * GET /api/recommendations/my
  * Get latest persisted recommendation for current user (paginated)
  */
+
 exports.getMyRecommendations = async (req, res) => {
   try {
     const userId = req.user._id;
+
+    // 1️⃣ Get latest recommendation only
     const rec = await Recommendation.findOne({ userId })
       .sort({ createdAt: -1 })
       .lean();
-    if (!rec)
-      return res.status(404).json({ message: "No recommendations found" });
 
-    // Expand the stored topCourses with course and college details
-    const courseIds = rec.topCourses.map((t) => t.courseId);
-    const courses = await Course.find({ _id: { $in: courseIds } })
+    if (!rec) {
+      return res.status(404).json({ message: "No recommendations found" });
+    }
+
+    /* =====================================================
+       🎓 COURSE ENRICHMENT
+    ====================================================== */
+
+    const courseIds = rec.recommendedCourses.map((c) => c.courseId);
+
+    const courses = await Course.find({
+      _id: { $in: courseIds },
+    })
       .populate("collegeId", "name rating location")
       .lean();
 
-    // Map courses by id for ordering
-    const byId = {};
-    courses.forEach((c) => (byId[c._id.toString()] = c));
+    const courseMap = {};
+    courses.forEach((c) => (courseMap[c._id.toString()] = c));
 
-    const enriched = rec.topCourses.map((t) => ({
-      ...t,
-      course: byId[t.courseId.toString()] || null,
+    const enrichedCourses = rec.recommendedCourses.map((c) => ({
+      ...c,
+      course: courseMap[c.courseId.toString()] || null,
     }));
 
-    return res.json({ success: true, recommendation: rec, results: enriched });
+    /* =====================================================
+       💼 JOB ENRICHMENT
+    ====================================================== */
+
+    const jobIds = rec.recommendedJobs?.map((j) => j.jobId);
+
+    const jobs = await Job.find({
+      _id: { $in: jobIds },
+    })
+      .populate("companyId", "name logo industry")
+      .lean();
+    console.log(rec);
+    const jobMap = {};
+    jobs.forEach((j) => (jobMap[j._id.toString()] = j));
+
+    const enrichedJobs = rec.recommendedJobs?.map((j) => ({
+      ...j,
+      job: jobMap[j.jobId.toString()] || null,
+    }));
+
+    /* =====================================================
+       📦 FINAL RESPONSE
+    ====================================================== */
+
+    return res.json({
+      success: true,
+      recommendationId: rec._id,
+      topCompetencies: rec.topCompetencies,
+      courses: enrichedCourses,
+      jobs: enrichedJobs,
+      meta: rec.meta,
+    });
   } catch (err) {
     console.error("getMyRecommendations error:", err);
-    return res
-      .status(500)
-      .json({ message: "Server error fetching recommendations" });
+    return res.status(500).json({
+      message: "Server error fetching recommendations",
+    });
   }
 };
 
