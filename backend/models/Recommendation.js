@@ -186,7 +186,6 @@ RecommendationSchema.index({ userId: 1, generatedAt: -1 });
 RecommendationSchema.index({ testResultId: 1 });
 RecommendationSchema.index({ averageScore: -1 });
 RecommendationSchema.index({ "recommendedItems.similarityScore": -1 });
-RecommendationSchema.index({ "recommendedItems.itemType": 1 });
 
 /* ------------------------------------------------------------------
    🔍 Methods
