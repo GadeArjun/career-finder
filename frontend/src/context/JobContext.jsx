@@ -40,10 +40,8 @@ export const JobProvider = ({ children }) => {
   const getJobById = async (id) => {
     try {
       setLoading(true);
-      console.log(`${API}/${id}`);
       const res = await axiosAuth.get(`${API}/${id}/one`);
       setJobDetails(res.data.job);
-      console.log({ a: res.data });
     } catch (err) {
       setError(err.response?.data?.message || "Failed to fetch job");
     } finally {
@@ -72,7 +70,6 @@ export const JobProvider = ({ children }) => {
   const createJob = async (data) => {
     try {
       setLoading(true);
-      console.log({ API });
       await axiosAuth.post(API, data);
       await getAllJobs(); // refresh list
     } catch (err) {

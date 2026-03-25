@@ -2,24 +2,23 @@
 const mongoose = require("mongoose");
 
 /* ------------------------------------------------------------------
-   ✅ Recommendation Schema (Production-Ready)
-   ------------------------------------------------------------------
-   Each record is generated when a student finishes a test.
-   It captures the user’s competency vector, computed matches to courses,
-   and meta-data useful for dashboards and re-generation.
+   🔹 Recommended Item Schema (Course / Job)
 -------------------------------------------------------------------*/
-
-const RecommendedCourseSchema = new mongoose.Schema(
+const RecommendedItemSchema = new mongoose.Schema(
   {
-    courseId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Course",
+    itemType: {
+      type: String,
+      enum: ["Course", "Job"],
       required: true,
+      index: true,
     },
-    collegeId: {
+
+    itemId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "College",
+      required: true,
+      refPath: "recommendedItems.itemType", // dynamic ref
     },
+
     similarityScore: {
       type: Number,
       required: true,
@@ -27,15 +26,29 @@ const RecommendedCourseSchema = new mongoose.Schema(
       max: 1,
       index: true,
     },
+
     rank: {
       type: Number,
       default: 0,
       index: true,
     },
+
+    strength: {
+      type: String,
+      enum: ["very_high", "high", "medium", "low"],
+      default: "medium",
+      index: true,
+    },
+
     reasoning: {
       type: String,
       trim: true,
       default: "",
+    },
+
+    matchedSkills: {
+      type: [String],
+      default: [],
     },
   },
   { _id: false }
@@ -51,8 +64,8 @@ const RecommendationSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      index: true,
     },
+
     testResultId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "TestResult",
@@ -60,7 +73,9 @@ const RecommendationSchema = new mongoose.Schema(
       index: true,
     },
 
-    // 🔹 Snapshot of competency profile at generation
+    /* ------------------------------------------------------------------
+       🔹 Competency Snapshot
+    -------------------------------------------------------------------*/
     competencyVector: {
       analytical: { type: Number, default: 0 },
       verbal: { type: Number, default: 0 },
@@ -69,11 +84,14 @@ const RecommendationSchema = new mongoose.Schema(
       social: { type: Number, default: 0 },
       technical: { type: Number, default: 0 },
     },
+    /* ------------------------------------------------------------------
+       🔹 Recommendations (Courses + Jobs)
+    -------------------------------------------------------------------*/
+    recommendedItems: [RecommendedItemSchema],
 
-    // 🔹 Recommended course list
-    recommendedCourses: [RecommendedCourseSchema],
-
-    // 🔹 Summary
+    /* ------------------------------------------------------------------
+       🔹 Summary
+    -------------------------------------------------------------------*/
     topCompetencies: {
       type: [String],
       default: [],
@@ -82,18 +100,20 @@ const RecommendationSchema = new mongoose.Schema(
 
     averageScore: {
       type: Number,
-      default: 0, // avg of top 10 course similarityScores
+      default: 0,
     },
 
-    totalCourses: {
+    totalItems: {
       type: Number,
       default: 0,
     },
 
-    // 🔹 Lifecycle & metadata
+    /* ------------------------------------------------------------------
+       🔹 Lifecycle
+    -------------------------------------------------------------------*/
     version: {
       type: Number,
-      default: 1, // increment if you regenerate for the same test result
+      default: 1,
     },
 
     generatedAt: {
@@ -103,7 +123,7 @@ const RecommendationSchema = new mongoose.Schema(
     },
 
     expiresAt: {
-      type: Date, // optional expiration for re-generation logic
+      type: Date,
     },
 
     status: {
@@ -112,80 +132,83 @@ const RecommendationSchema = new mongoose.Schema(
       default: "active",
     },
 
+    /* ------------------------------------------------------------------
+       🔹 Metadata (AI + Debugging)
+    -------------------------------------------------------------------*/
     meta: {
-      filters: { type: Object }, // optional: store course filter criteria used
+      filters: { type: Object },
       candidateCount: { type: Number, default: 0 },
       generationTimeMs: { type: Number, default: 0 },
-      algorithm: { type: String, default: "cosine_similarity_v1" },
+      algorithm: { type: String, default: "cosine_similarity_v2" },
     },
   },
   { timestamps: true }
 );
 
 /* ------------------------------------------------------------------
-   ⚙️ Middleware — Pre-save hook
-   ------------------------------------------------------------------
-   Automatically compute:
-   - average similarity score
-   - totalCourses
-   - sort courses by similarity
+   ⚙️ Middleware — Auto Processing
 -------------------------------------------------------------------*/
 RecommendationSchema.pre("save", function (next) {
-  if (
-    Array.isArray(this.recommendedCourses) &&
-    this.recommendedCourses.length
-  ) {
-    // sort descending
-    this.recommendedCourses.sort(
-      (a, b) => b.similarityScore - a.similarityScore
-    );
+  if (Array.isArray(this.recommendedItems) && this.recommendedItems.length) {
+    // 🔹 Sort by score
+    this.recommendedItems.sort((a, b) => b.similarityScore - a.similarityScore);
 
-    // assign rank
-    this.recommendedCourses.forEach((rc, i) => (rc.rank = i + 1));
+    // 🔹 Assign rank + strength
+    this.recommendedItems.forEach((item, i) => {
+      item.rank = i + 1;
 
-    // compute aggregates
-    const top10 = this.recommendedCourses.slice(0, 10);
+      if (item.similarityScore >= 0.85) item.strength = "very_high";
+      else if (item.similarityScore >= 0.7) item.strength = "high";
+      else if (item.similarityScore >= 0.5) item.strength = "medium";
+      else item.strength = "low";
+    });
+
+    // 🔹 Compute averages
+    const top10 = this.recommendedItems.slice(0, 10);
     const avg =
-      top10.reduce((sum, c) => sum + (c.similarityScore || 0), 0) /
+      top10.reduce((sum, i) => sum + (i.similarityScore || 0), 0) /
       (top10.length || 1);
+
     this.averageScore = Number(avg.toFixed(4));
-    this.totalCourses = this.recommendedCourses.length;
+    this.totalItems = this.recommendedItems.length;
   } else {
     this.averageScore = 0;
-    this.totalCourses = 0;
+    this.totalItems = 0;
   }
 
   next();
 });
 
 /* ------------------------------------------------------------------
-   🧩 Indexes for performance
+   🧩 Indexes
 -------------------------------------------------------------------*/
 RecommendationSchema.index({ userId: 1, generatedAt: -1 });
 RecommendationSchema.index({ testResultId: 1 });
 RecommendationSchema.index({ averageScore: -1 });
-RecommendationSchema.index({ "recommendedCourses.similarityScore": -1 });
-RecommendationSchema.index({ "recommendedCourses.courseId": 1 });
+RecommendationSchema.index({ "recommendedItems.similarityScore": -1 });
+RecommendationSchema.index({ "recommendedItems.itemType": 1 });
 
 /* ------------------------------------------------------------------
-   🔍 Virtuals & Methods
+   🔍 Methods
 -------------------------------------------------------------------*/
 
-// Compute vector magnitude (useful for analytics)
+// Vector magnitude (analytics / ML tuning)
 RecommendationSchema.methods.vectorMagnitude = function () {
   const v = Object.values(this.competencyVector);
-  const sumSq = v.reduce((sum, x) => sum + x * x, 0);
-  return Math.sqrt(sumSq);
+  return Math.sqrt(v.reduce((sum, x) => sum + x * x, 0));
 };
 
-// Get top N courses
-RecommendationSchema.methods.topCourses = function (limit = 5) {
-  return (this.recommendedCourses || [])
-    .sort((a, b) => b.similarityScore - a.similarityScore)
-    .slice(0, limit);
+// Top N items
+RecommendationSchema.methods.topItems = function (limit = 5) {
+  return (this.recommendedItems || []).slice(0, limit);
 };
 
-// Mark record as stale (e.g., after X days)
+// Filter by type (course/job)
+RecommendationSchema.methods.getByType = function (type = "course") {
+  return (this.recommendedItems || []).filter((item) => item.itemType === type);
+};
+
+// Mark stale
 RecommendationSchema.methods.markStale = async function () {
   this.status = "stale";
   await this.save();
@@ -193,13 +216,11 @@ RecommendationSchema.methods.markStale = async function () {
 };
 
 /* ------------------------------------------------------------------
-   🧠 Auto-expire old recommendations
-   (Optional: TTL index — runs only if you enable it)
+   ⏳ TTL Index (Auto Delete Expired Docs)
 -------------------------------------------------------------------*/
-// This will automatically delete documents after their expiresAt date
 RecommendationSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 /* ------------------------------------------------------------------
-   ✅ Export model
+   ✅ Export
 -------------------------------------------------------------------*/
 module.exports = mongoose.model("Recommendation", RecommendationSchema);

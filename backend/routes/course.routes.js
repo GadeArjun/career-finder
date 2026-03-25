@@ -14,5 +14,6 @@ router.get(
   courseController.getCoursesByCollege
 );
 router.get("/:id", protect, courseController.getCourseById);
+router.get("/:id/view", courseController.getCourseByIdPublic);
 
 module.exports = router;

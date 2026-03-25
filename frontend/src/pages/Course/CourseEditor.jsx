@@ -105,14 +105,13 @@ const CourseEditor = () => {
     setIsSaving(true);
     try {
       if (courseId) {
-        console.log({ courseId });
-          await updateCourse(courseId, formData);
-          alert("Course Updated Successfully")
+        await updateCourse(courseId, formData);
+        alert("Course Updated Successfully");
       } else {
-          await createCourse(formData);
-          alert("Course Created Successfully")
+        await createCourse(formData);
+        alert("Course Created Successfully");
       }
-    //   navigate(-1);
+      //   navigate(-1);
     } catch (err) {
       console.error("Save failed", err);
     } finally {

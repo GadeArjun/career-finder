@@ -41,7 +41,6 @@ function AptitudeTest() {
         );
         const data = res.data;
         setTest(data);
-        console.log(data);
         // Set timer based on API duration (convert minutes to seconds)
         setTimeRemaining(data.duration * 60);
         setLoading(false);
@@ -117,7 +116,6 @@ function AptitudeTest() {
   useEffect(() => {
     if (testCompleted) {
       submitTest();
-      console.log("submit");
     }
   }, [testCompleted]);
 
@@ -128,7 +126,6 @@ function AptitudeTest() {
       totalQuestions: test.questions.length,
       answers,
     };
-    console.log("FINAL SUBMISSION:", submission);
 
     // Logic to send to backend:
     const res = await axios.post(
@@ -142,8 +139,7 @@ function AptitudeTest() {
       }
     );
 
-    console.log(res.data);
-    // navigate("/student/recommendations");
+    navigate("/student/recommendations");
   };
 
   if (loading)

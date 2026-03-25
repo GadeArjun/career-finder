@@ -85,7 +85,7 @@ const COMPETENCIES = [
 const ManageCompany = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const {  updateCompany, getCompanyById } = useCompanyContext();
+  const { updateCompany, getCompanyById } = useCompanyContext();
 
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("basic");
@@ -135,7 +135,6 @@ const ManageCompany = () => {
       setLoading(true);
       const res = await getCompanyById(id);
       setFormData(res.data.company);
-      console.log(res.data.company);
       setLoading(false);
     }
     if (id) {
@@ -185,7 +184,6 @@ const ManageCompany = () => {
     setLoading(true);
     // Logic to call addCompany or updateCompany context functions
     await updateCompany(id, formData);
-    console.log("Final Company Data:", formData);
     setTimeout(() => {
       setLoading(false);
       navigate("/company/companys");

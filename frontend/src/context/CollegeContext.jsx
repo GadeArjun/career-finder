@@ -32,7 +32,6 @@ export const CollegeProvider = ({ children }) => {
       });
 
       const data = await res.json();
-      console.log({ a: data.colleges });
       if (res.ok) {
         setColleges(data.colleges || []);
         setError("");
@@ -154,7 +153,6 @@ export const CollegeProvider = ({ children }) => {
   useEffect(() => {
     if (user?.role === "college" || user?.role === "admin") {
       fetchColleges();
-      console.log("fetc");
     }
   }, [user, token]);
 

@@ -84,7 +84,6 @@ const JobEditor = () => {
     setFormData((prev) => ({ ...prev, [field]: arr }));
   };
 
-  console.log({ jobId, companyId });
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSaving(true);

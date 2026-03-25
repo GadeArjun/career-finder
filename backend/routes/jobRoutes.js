@@ -10,5 +10,6 @@ router.delete("/:id", protect, jobController.deleteJob);
 router.get("/", protect, jobController.getAllJobs);
 router.get("/:companyId", protect, jobController.getJobsByCompany);
 router.get("/:id/one", protect, jobController.getJobById);
+router.get("/:id/view", jobController.getJobByIdPublic);
 
 module.exports = router;

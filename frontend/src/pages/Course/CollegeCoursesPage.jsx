@@ -36,7 +36,6 @@ const CollegeCoursesPage = () => {
       await deleteCourse(id);
     }
   };
-  console.log({ collegeCourses });
 
   if (loading)
     return (

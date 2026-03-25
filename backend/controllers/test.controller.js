@@ -7,7 +7,7 @@ const { generateFullRecommendations } = require("./recommendationEngine");
 ========================================================= */
 exports.createTest = async (req, res) => {
   try {
-    const userId = req.user.id; // from protect middleware
+    const userId = req.user._id; // from protect middleware
 
     const {
       title,
@@ -124,7 +124,7 @@ exports.createTest = async (req, res) => {
 exports.updateTest = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user.id;
+    const userId = req.user._id;
 
     const test = await Test.findById(id);
     if (!test) {
@@ -353,7 +353,7 @@ exports.deleteTest = async (req, res) => {
 exports.submitTestResult = async (req, res) => {
   try {
     const { testId, answers } = req.body; // 'answers' is the object from your previous prompt
-    const userId = req.user.id; // Obtained from your auth middleware
+    const userId = req.user._id; // Obtained from your auth middleware
 
     // 1. Fetch the master test to verify correct answers and competencies
     const masterTest = await Test.findById(testId);

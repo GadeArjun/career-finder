@@ -129,7 +129,7 @@ const ManageCollege = () => {
   useEffect(() => {
     async function loadCollege(id) {
       const res = await getCollegeById(id);
-      console.log(res.data);
+      res.data;
       setFormData(res.data);
       setLoading(false);
     }

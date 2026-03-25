@@ -132,6 +132,33 @@ const CourseSchema = new mongoose.Schema(
       enum: ["active", "inactive"],
       default: "active",
     },
+    youtubeVideos: [
+      {
+        videoId: {
+          type: String,
+          required: true,
+        },
+        title: {
+          type: String,
+          required: true,
+        },
+        description: {
+          type: String,
+        },
+        thumbnail: {
+          type: String,
+        },
+        channelName: {
+          type: String,
+        },
+        publishedAt: {
+          type: Date, // Better to store as Date than String for sorting by newest
+        },
+        link: {
+          type: String,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );

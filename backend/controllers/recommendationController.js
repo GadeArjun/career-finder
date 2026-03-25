@@ -319,70 +319,153 @@ exports.getMyRecommendations = async (req, res) => {
   try {
     const userId = req.user._id;
 
-    // 1️⃣ Get latest recommendation only
-    const rec = await Recommendation.findOne({ userId })
+    /* =====================================================
+       1️⃣ GET LAST 10 RECOMMENDATIONS
+    ====================================================== */
+    const recommendations = await Recommendation.find({ userId })
       .sort({ createdAt: -1 })
+      .limit(10)
       .lean();
 
-    if (!rec) {
-      return res.status(404).json({ message: "No recommendations found" });
+    if (!recommendations.length) {
+      return res.status(404).json({
+        success: false,
+        message: "No recommendations found",
+      });
     }
 
     /* =====================================================
-       🎓 COURSE ENRICHMENT
+       2️⃣ FETCH RELATED TEST RESULTS
     ====================================================== */
+    const testResultIds = recommendations.map((r) => r.testResultId);
 
-    const courseIds = rec.recommendedCourses.map((c) => c.courseId);
-
-    const courses = await Course.find({
-      _id: { $in: courseIds },
+    const testResults = await TestResult.find({
+      _id: { $in: testResultIds },
     })
-      .populate("collegeId", "name rating location")
+      .populate("testId", "title category duration")
       .lean();
+
+    const testResultMap = {};
+    testResults.forEach((tr) => {
+      testResultMap[tr._id.toString()] = tr;
+    });
+
+    /* =====================================================
+       3️⃣ COLLECT ALL ITEM IDS (OPTIMIZED)
+    ====================================================== */
+    let allCourseIds = [];
+    let allJobIds = [];
+
+    recommendations.forEach((rec) => {
+      (rec.recommendedItems || []).forEach((item) => {
+        if (item.itemType === "Course") {
+          allCourseIds.push(item.itemId);
+        } else if (item.itemType === "Job") {
+          allJobIds.push(item.itemId);
+        }
+      });
+    });
+
+    /* =====================================================
+       4️⃣ FETCH COURSES + JOBS (BULK)
+    ====================================================== */
+    const [courses, jobs] = await Promise.all([
+      Course.find({ _id: { $in: allCourseIds } })
+        .populate("collegeId", "name rating location")
+        .lean(),
+
+      Job.find({ _id: { $in: allJobIds } })
+        .populate("companyId", "name logo industry")
+        .lean(),
+    ]);
 
     const courseMap = {};
     courses.forEach((c) => (courseMap[c._id.toString()] = c));
 
-    const enrichedCourses = rec.recommendedCourses.map((c) => ({
-      ...c,
-      course: courseMap[c.courseId.toString()] || null,
-    }));
-
-    /* =====================================================
-       💼 JOB ENRICHMENT
-    ====================================================== */
-
-    const jobIds = rec.recommendedJobs?.map((j) => j.jobId);
-
-    const jobs = await Job.find({
-      _id: { $in: jobIds },
-    })
-      .populate("companyId", "name logo industry")
-      .lean();
-    console.log(rec);
     const jobMap = {};
     jobs.forEach((j) => (jobMap[j._id.toString()] = j));
 
-    const enrichedJobs = rec.recommendedJobs?.map((j) => ({
-      ...j,
-      job: jobMap[j.jobId.toString()] || null,
-    }));
+    /* =====================================================
+       5️⃣ BUILD FINAL TIMELINE RESPONSE
+    ====================================================== */
+    const timeline = recommendations.map((rec) => {
+      const testResult = testResultMap[rec.testResultId?.toString()] || null;
+
+      const items = (rec.recommendedItems || []).map((item) => {
+        if (item.itemType === "Course") {
+          return {
+            ...item,
+            data: courseMap[item.itemId?.toString()] || null,
+          };
+        } else {
+          return {
+            ...item,
+            data: jobMap[item.itemId?.toString()] || null,
+          };
+        }
+      });
+
+      // split for frontend
+      const courses = items
+        .filter((i) => i.itemType === "Course")
+        .sort((a, b) => b.similarityScore - a.similarityScore)
+        .slice(0, 5);
+
+      const jobs = items
+        .filter((i) => i.itemType === "Job")
+        .sort((a, b) => b.similarityScore - a.similarityScore)
+        .slice(0, 5);
+
+      return {
+        recommendationId: rec._id,
+        generatedAt: rec.createdAt,
+
+        /* 🧠 TEST CONTEXT */
+        test: testResult
+          ? {
+              testId: testResult.testId?._id,
+              title: testResult.testId?.title,
+              category: testResult.testId?.category,
+              completedAt: testResult.completedAt,
+              score: testResult.percentage,
+            }
+          : null,
+
+        /* 📊 USER PROFILE */
+        profile: {
+          competencies: rec.competencyVector,
+          topCompetencies: rec.topCompetencies,
+        },
+
+        /* 🎯 RECOMMENDATIONS */
+        recommendations: {
+          courses,
+          jobs,
+        },
+
+        /* 📈 META */
+        stats: {
+          totalItems: rec.totalItems,
+          averageScore: rec.averageScore,
+        },
+
+        meta: rec.meta,
+      };
+    });
 
     /* =====================================================
-       📦 FINAL RESPONSE
+       6️⃣ FINAL RESPONSE
     ====================================================== */
-
     return res.json({
       success: true,
-      recommendationId: rec._id,
-      topCompetencies: rec.topCompetencies,
-      courses: enrichedCourses,
-      jobs: enrichedJobs,
-      meta: rec.meta,
+      count: timeline.length,
+      timeline,
     });
   } catch (err) {
     console.error("getMyRecommendations error:", err);
+
     return res.status(500).json({
+      success: false,
       message: "Server error fetching recommendations",
     });
   }

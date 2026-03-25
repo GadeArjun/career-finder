@@ -27,7 +27,6 @@ function Register() {
         `${import.meta.env.VITE_BACKEND_URL}/api/users/register`,
         formData
       );
-      console.log(res.data);
       setLoading(false);
       navigate("/login"); // redirect after registration
     } catch (err) {

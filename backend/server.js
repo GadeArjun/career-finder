@@ -13,6 +13,12 @@ const courseRoutes = require("./routes/course.routes");
 const Test = require("./models/Test");
 const testRoutes = require("./routes/test.routes");
 const { recommendationRouter } = require("./routes/recommendationRoutes");
+const Course = require("./models/Course");
+const { getYouTubeCourses } = require("./services/youtube.service");
+const {
+  getDashboardInsights,
+} = require("./controllers/studentDashboard.controller");
+const { protect } = require("./middleware/auth");
 // const recommendationRoutes = require("./routes/recommendationRoutes")
 
 // Load env vars
@@ -38,6 +44,7 @@ app.use("/api/job", jobRouter);
 app.use("/api/course", courseRoutes);
 app.use("/api/tests", testRoutes);
 app.use("/api/recommendation", recommendationRouter);
+app.get("/api/student/dashboard", protect, getDashboardInsights);
 
 app.get(/.*/, (req, res) => {
   return res.sendFile(path.join(__dirname, "public", "dist", "index.html"));

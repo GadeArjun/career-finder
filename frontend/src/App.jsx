@@ -70,6 +70,8 @@ import CompanyJobsPage from "./pages/Job/CompanyjobsPage";
 import JobEditor from "./pages/Job/JobEditor";
 import CollegeCoursesPage from "./pages/Course/CollegeCoursesPage";
 import CourseEditor from "./pages/Course/CourseEditor";
+import JobDetailView from "./pages/Job/JobDetailView";
+import CourseDetailView from "./pages/Course/CourseDetailView";
 
 export default function App() {
   const { user } = useUserContext();
@@ -88,6 +90,8 @@ export default function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/job/view/:jobId" element={<JobDetailView />} />
+        <Route path="/course/view/:courseId" element={<CourseDetailView />} />
 
         {/* Protected Student Routes */}
         {user && user.role === "student" && (
@@ -113,7 +117,7 @@ export default function App() {
           path="/student/*"
           element={
             <ProtectedRoute>
-              <h1>Not Found</h1>
+              <h1>Not Found student</h1>
             </ProtectedRoute>
           }
         />
@@ -149,7 +153,7 @@ export default function App() {
           path="/college/*"
           element={
             <ProtectedRoute>
-              <h1>Not Found</h1>
+              <h1>Not Found college</h1>
             </ProtectedRoute>
           }
         />
@@ -163,6 +167,7 @@ export default function App() {
             <Route path="jobs/:companyId" element={<CompanyJobsPage />} />
             <Route path="job/add/:companyId" element={<JobEditor />} />
             <Route path="job/edit/:jobId" element={<JobEditor />} />
+
             <Route path="companys/:id" element={<ManageCompany />} />
             <Route path="settings" element={<Settings />} />
           </Route>
@@ -172,13 +177,13 @@ export default function App() {
           path="/company/*"
           element={
             <ProtectedRoute>
-              <h1>Not Found</h1>
+              <h1>Not Found company</h1>
             </ProtectedRoute>
           }
         />
 
         {/* Wildcard route */}
-        <Route path="*" element={<h1>Not Found</h1>} />
+        <Route path="*" element={<h1>Not Found*</h1>} />
       </Routes>
     </BrowserRouter>
   );
