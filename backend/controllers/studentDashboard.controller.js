@@ -49,7 +49,7 @@ exports.getDashboardInsights = async (req, res) => {
       status = "warning";
       nextStep = {
         label: "Take First Test",
-        route: "/student/tests",
+        route: "/student/aptitude-test",
         priority: "critical",
       };
     } else if (user.profileCompletion < 70) {

@@ -406,7 +406,7 @@ const Dashboard = () => {
                     Insufficient data for career matching.
                   </p>
                   <Link
-                    to="/student/tests"
+                    to="/student/aptitude-test"
                     className="text-blue-400 text-xs font-bold uppercase tracking-widest hover:underline"
                   >
                     Initialize Assessment →
