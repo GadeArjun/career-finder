@@ -18,7 +18,15 @@ const CourseSchema = new mongoose.Schema(
     duration: { type: String, required: true, trim: true }, // 3 Years, 4 Years
     degreeType: {
       type: String,
-      enum: ["Diploma", "UG", "PG", "PhD", "Certification"],
+      enum: [
+        "Diploma",
+        "UG",
+        "PG",
+        "PhD",
+        "Certification",
+        "UG+PG",
+        "Doctorate",
+      ],
     },
 
     branch: String, // CSE, IT, AI, Mechanical
@@ -59,20 +67,11 @@ const CourseSchema = new mongoose.Schema(
     bestFor: [
       {
         type: String,
-        enum: [
-          "Problem Solvers",
-          "Creative Minds",
-          "Tech Enthusiasts",
-          "Researchers",
-          "Entrepreneurs",
-          "Analytical Thinkers",
-        ],
       },
     ],
 
     learningStyle: {
       type: String,
-      enum: ["Practical", "Research-Based", "Industry-Oriented", "Academic"],
     },
 
     /** 🛠 SKILLS TAUGHT */

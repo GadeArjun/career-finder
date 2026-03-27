@@ -19,7 +19,11 @@ const {
   getDashboardInsights,
 } = require("./controllers/studentDashboard.controller");
 const { protect } = require("./middleware/auth");
-const { createBulkCourse,  createBulkCollege } = require("./services/createCoursesBulk.service");
+const {
+  createBulkCourse,
+  createBulkCollege,
+} = require("./services/createCoursesBulk.service");
+const College = require("./models/College");
 // const recommendationRoutes = require("./routes/recommendationRoutes")
 
 // Load env vars
@@ -51,43 +55,6 @@ app.get(/.*/, (req, res) => {
   return res.sendFile(path.join(__dirname, "public", "dist", "index.html"));
 });
 const PORT = process.env.PORT || 5000;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 app.listen(PORT, async () => {
