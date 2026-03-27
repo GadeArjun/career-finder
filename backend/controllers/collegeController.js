@@ -1,18 +1,5 @@
 const College = require("../models/College");
 const CollegeOwner = require("../models/CollegeOwner");
-const User = require("../models/User");
-
-/* -------------------------------------------------------------------
-   🧠 Helper: Check if user is authorized to manage a college
-------------------------------------------------------------------- */
-const verifyOwnership = async (user, collegeId) => {
-  if (user.role === "admin") return true;
-  const owner = await CollegeOwner.findOne({ userId: user._id });
-  if (!owner) return false;
-  return owner.linkedColleges.some(
-    (id) => id.toString() === collegeId.toString()
-  );
-};
 
 /* -------------------------------------------------------------------
    @desc   Add new college
@@ -130,13 +117,6 @@ exports.updateCollege = async (req, res) => {
     const { id } = req.params;
     const user = req.user;
 
-    const isOwner = await verifyOwnership(user, id);
-    if (!isOwner && user.role !== "admin") {
-      return res
-        .status(403)
-        .json({ message: "Not authorized to update this college." });
-    }
-
     const updates = req.body;
     const updated = await College.findByIdAndUpdate(id, updates, { new: true });
 
@@ -207,13 +187,6 @@ exports.deleteCollege = async (req, res) => {
   try {
     const { id } = req.params;
     const user = req.user;
-
-    const isOwner = await verifyOwnership(user, id);
-    if (!isOwner && user.role !== "admin") {
-      return res
-        .status(403)
-        .json({ message: "Not authorized to delete this college." });
-    }
 
     const deleted = await College.findByIdAndDelete(id);
     if (!deleted)
