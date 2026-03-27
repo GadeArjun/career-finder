@@ -102,18 +102,17 @@ exports.getMyColleges = async (req, res) => {
       return res.status(403).json({ message: "Access denied." });
     }
 
-    const owner = await CollegeOwner.findOne({ userId: user._id }).populate({
-      path: "linkedColleges",
-      options: { sort: { createdAt: -1 } },
+    const colleges = await College.find({ ownerId: user._id }).sort({
+      createdAt: -1,
     });
 
-    if (!owner || !owner.linkedColleges.length) {
+    if (!colleges || !colleges.length) {
       return res.status(404).json({ message: "No colleges found." });
     }
 
     res.json({
-      count: owner.linkedColleges.length,
-      colleges: owner.linkedColleges,
+      count: colleges.length,
+      colleges: colleges,
     });
   } catch (err) {
     console.error("❌ Error fetching owner colleges:", err);
