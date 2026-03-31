@@ -24,6 +24,7 @@ const {
   createBulkCollege,
 } = require("./services/createCoursesBulk.service");
 const College = require("./models/College");
+const { chat, getHistory } = require("./controllers/chat.controller");
 // const recommendationRoutes = require("./routes/recommendationRoutes")
 
 // Load env vars
@@ -50,12 +51,13 @@ app.use("/api/course", courseRoutes);
 app.use("/api/tests", testRoutes);
 app.use("/api/recommendation", recommendationRouter);
 app.get("/api/student/dashboard", protect, getDashboardInsights);
+app.post("/api/ai/chat", protect, chat);
+app.get("/api/ai/history", protect, getHistory);
 
 app.get(/.*/, (req, res) => {
   return res.sendFile(path.join(__dirname, "public", "dist", "index.html"));
 });
 const PORT = process.env.PORT || 5000;
-
 
 app.listen(PORT, async () => {
   /*

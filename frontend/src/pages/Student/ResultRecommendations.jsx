@@ -28,6 +28,7 @@ import axios from "axios";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { Link } from "react-router-dom";
+import AIChatWidget from "../../components/provate/AIChatWidget";
 
 const ResultRecommendations = () => {
   const [data, setData] = useState(null);
@@ -44,6 +45,7 @@ const ResultRecommendations = () => {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
       );
+      console.log({ data: res.data });
       setData(res.data);
     } catch (err) {
       console.error("Error fetching recommendations:", err);
@@ -280,6 +282,7 @@ const ResultRecommendations = () => {
   return (
     <div className="flex flex-col min-h-screen bg-[#030712] text-slate-200 font-poppins selection:bg-blue-500/30">
       <Header title="Career Intelligence" />
+      <AIChatWidget />
 
       <main className="flex-1 p-6 mt-20 max-w-7xl mx-auto w-full flex flex-col gap-12">
         {/* HERO ANALYTICS CARD */}
@@ -394,16 +397,25 @@ const ResultRecommendations = () => {
                     stroke="#1e293b"
                     vertical={false}
                   />
+                  {/* XAxis is hidden, but if shown, use: tick={{fill: 'white'}} */}
                   <XAxis dataKey="name" hide />
+
                   <Tooltip
                     cursor={{ fill: "rgba(59, 130, 246, 0.1)" }}
+                    // contentStyle handles the container background and border
                     contentStyle={{
                       backgroundColor: "#0f172a",
                       border: "1px solid #1e293b",
                       borderRadius: "12px",
                       fontSize: "12px",
+                      outline: "none",
                     }}
+                    // itemStyle ensures the "score: value" text is white
+                    itemStyle={{ color: "#ffffff" }}
+                    // labelStyle ensures the "name/category" text is white
+                    labelStyle={{ color: "#ffffff" }}
                   />
+
                   <Bar dataKey="score" radius={[6, 6, 0, 0]}>
                     {chartData.map((entry, index) => (
                       <Cell

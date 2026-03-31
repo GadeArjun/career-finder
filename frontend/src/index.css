@@ -9,3 +9,56 @@
 .label {
   @apply text-xs font-bold text-gray-400 uppercase mb-1.5 block tracking-wide;
 }
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar (light theme, works in modern browsers) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 116, 139, 0.6); /* slate-400/60 */
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(100, 116, 139, 0.9); /* darker on hover */
+}
+
+/* Remove default margin/padding for body */
+body {
+  @apply m-0 p-0 bg-slate-950 text-slate-100 font-sans;
+}
+
+/* Default link styles */
+a {
+  @apply text-blue-400 hover:text-blue-300 transition-colors;
+  text-decoration: none;
+}
+
+/* Default button reset */
+button {
+  @apply cursor-pointer bg-transparent border-none;
+}
+
+/* Text selection */
+::selection {
+  @apply bg-blue-500 text-white;
+}
+
+/* Utility for custom scrollbar in containers */
+.custom-scrollbar {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: rgba(100, 116, 139, 0.6) transparent;
+}

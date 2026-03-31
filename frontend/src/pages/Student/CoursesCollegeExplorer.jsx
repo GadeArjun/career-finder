@@ -1,343 +1,333 @@
-import React, { useState } from "react";
-import { Search, Filter, X, MessageCircle } from "lucide-react";
+import React, { useEffect, useState, useMemo } from "react";
+import { Link } from "react-router-dom";
+import {
+  Search,
+  MapPin,
+  Clock,
+  IndianRupee,
+  Briefcase,
+  TrendingUp,
+  GraduationCap,
+  ArrowRight,
+  Filter,
+  Layers,
+} from "lucide-react";
 import Header from "../../components/common/Header";
+import { useCourses } from "../../context/CourseContext";
+import { useCollegeContext } from "../../context/CollegeContext";
 
-// ===== Extended Sample Data =====
-const coursesData = [
-  {
-    courseName: "B.Sc. Computer Science",
-    collegeName: "MIT College, Pune",
-    collegeLogo: "https://img.icons8.com/color/48/computer.png",
-    duration: "3 Years",
-    fee: "₹60,000/year",
-    mode: "Offline",
-    type: "Private",
-    tags: ["Top Rated", "Popular"],
-    overview:
-      "Comprehensive Computer Science program covering algorithms, databases, and software development.",
-    eligibility: "10+2 with Science background",
-    admissionProcess: "Entrance Exam + Interview",
-    location: "Pune",
-  },
-  {
-    courseName: "B.A. Psychology",
-    collegeName: "Global University, Delhi",
-    collegeLogo: "https://img.icons8.com/color/48/psychology.png",
-    duration: "3 Years",
-    fee: "₹50,000/year",
-    mode: "Online",
-    type: "Private",
-    tags: ["New", "Popular"],
-    overview:
-      "Learn behavioral science, mental health, and counseling techniques.",
-    eligibility: "10+2 in any stream",
-    admissionProcess: "Merit-based + Personal Interview",
-    location: "Delhi",
-  },
-  {
-    courseName: "B.Com Finance",
-    collegeName: "National College, Mumbai",
-    collegeLogo: "https://img.icons8.com/color/48/accounting.png",
-    duration: "3 Years",
-    fee: "₹45,000/year",
-    mode: "Offline",
-    type: "Government",
-    tags: ["Top Rated"],
-    overview:
-      "Gain expertise in accounting, taxation, and financial management.",
-    eligibility: "10+2 with Commerce/Math",
-    admissionProcess: "Entrance Exam",
-    location: "Mumbai",
-  },
-  {
-    courseName: "B.Tech Mechanical Engineering",
-    collegeName: "IIT Bombay",
-    collegeLogo: "https://img.icons8.com/color/48/engineering.png",
-    duration: "4 Years",
-    fee: "₹1,50,000/year",
-    mode: "Offline",
-    type: "Government",
-    tags: ["Top Rated", "Prestigious"],
-    overview:
-      "Mechanical design, manufacturing systems, thermodynamics, and robotics.",
-    eligibility: "JEE Main + Advanced Qualification",
-    admissionProcess: "Entrance Exam (JEE)",
-    location: "Mumbai",
-  },
-  {
-    courseName: "BBA Marketing",
-    collegeName: "Symbiosis International, Pune",
-    collegeLogo: "https://img.icons8.com/color/48/marketing.png",
-    duration: "3 Years",
-    fee: "₹90,000/year",
-    mode: "Offline",
-    type: "Private",
-    tags: ["Popular"],
-    overview:
-      "Develop management skills with a focus on marketing, communication, and business operations.",
-    eligibility: "10+2 in any stream",
-    admissionProcess: "Entrance Exam + Interview",
-    location: "Pune",
-  },
-  {
-    courseName: "B.Sc. Data Science",
-    collegeName: "Amity University, Noida",
-    collegeLogo: "https://img.icons8.com/color/48/data-configuration.png",
-    duration: "3 Years",
-    fee: "₹80,000/year",
-    mode: "Online",
-    type: "Private",
-    tags: ["Trending", "Tech Focused"],
-    overview:
-      "Learn AI, Machine Learning, Python, and statistical modeling techniques.",
-    eligibility: "10+2 with Math",
-    admissionProcess: "Merit + Interview",
-    location: "Noida",
-  },
-  {
-    courseName: "B.Des. UI/UX Design",
-    collegeName: "NIFT Bangalore",
-    collegeLogo: "https://img.icons8.com/color/48/design.png",
-    duration: "4 Years",
-    fee: "₹1,00,000/year",
-    mode: "Offline",
-    type: "Government",
-    tags: ["Creative", "Design"],
-    overview:
-      "Focused on visual design, usability, and digital interface creativity.",
-    eligibility: "10+2 in any stream",
-    admissionProcess: "NIFT Entrance + Portfolio Review",
-    location: "Bangalore",
-  },
-  {
-    courseName: "BCA Cloud Computing",
-    collegeName: "Lovely Professional University, Punjab",
-    collegeLogo: "https://img.icons8.com/color/48/cloud.png",
-    duration: "3 Years",
-    fee: "₹70,000/year",
-    mode: "Online",
-    type: "Private",
-    tags: ["Tech Focused", "New Age"],
-    overview:
-      "Covers cloud infrastructure, cybersecurity, and enterprise-level computing.",
-    eligibility: "10+2 with Math or CS",
-    admissionProcess: "Merit-based",
-    location: "Punjab",
-  },
-];
+/**
+ * Professional Indian Rupee Formatter
+ */
+const formatCurrency = (amount) => {
+  if (!amount) return "₹0";
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(amount);
+};
 
-function CoursesCollegeExplorer() {
-  const [filters, setFilters] = useState({
-    field: "",
-    location: "",
-    duration: "",
-    feeRange: "",
-    collegeType: "",
-  });
-  const [selectedCourse, setSelectedCourse] = useState(null);
-  const [sortBy, setSortBy] = useState("Popularity");
+export default function CourseExplorer() {
+  const { getAllCourses, courses } = useCourses();
+  const { fetchAllColleges } = useCollegeContext();
+
+  const [colleges, setColleges] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [visibleCount, setVisibleCount] = useState(6);
 
-  // ===== Filter logic =====
+  // Advanced Filtering State
+  const [filters, setFilters] = useState({
+    search: "",
+    degreeType: "",
+    duration: "",
+    feeRange: "",
+  });
+  const [sortBy, setSortBy] = useState("Popularity");
+
+  // Initial Data Synchronization
+  useEffect(() => {
+    async function loadData() {
+      setLoading(true);
+      try {
+        await getAllCourses();
+        const fetchedColleges = await fetchAllColleges();
+        setColleges(fetchedColleges || []);
+      } catch (error) {
+        console.error("Data Sync Error:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
+
+  // Logical Merging: Enriches Course data with its parent College metadata
+  const enrichedCourses = useMemo(() => {
+    if (!courses) return [];
+    return courses.map((course) => {
+      const parentCollege =
+        colleges.find((c) => c._id === course.collegeId?._id) ||
+        course.collegeId;
+      return { ...course, parentCollege };
+    });
+  }, [courses, colleges]);
+
+  // Main Filter & Sort Engine
+  const processedCourses = useMemo(() => {
+    return enrichedCourses
+      .filter((course) => {
+        const term = filters.search.toLowerCase();
+        const searchMatch =
+          !filters.search ||
+          course.title?.toLowerCase().includes(term) ||
+          course.parentCollege?.name?.toLowerCase().includes(term);
+
+        const degreeMatch =
+          !filters.degreeType || course.degreeType === filters.degreeType;
+        const durationMatch =
+          !filters.duration || course.duration?.includes(filters.duration);
+
+        let feeMatch = true;
+        const perYearFee = course.feeStructure?.perYear || 0;
+        if (filters.feeRange === "0-1L") feeMatch = perYearFee <= 100000;
+        else if (filters.feeRange === "1L-3L")
+          feeMatch = perYearFee > 100000 && perYearFee <= 300000;
+        else if (filters.feeRange === "3L+") feeMatch = perYearFee > 300000;
+
+        return searchMatch && degreeMatch && durationMatch && feeMatch;
+      })
+      .sort((a, b) => {
+        if (sortBy === "Popularity")
+          return (b.popularityScore || 0) - (a.popularityScore || 0);
+        if (sortBy === "Fees: Low to High")
+          return (
+            (a.feeStructure?.perYear || 0) - (b.feeStructure?.perYear || 0)
+          );
+        if (sortBy === "Highest Package")
+          return (
+            (b.placementStats?.highestPackage || 0) -
+            (a.placementStats?.highestPackage || 0)
+          );
+        return 0;
+      });
+  }, [enrichedCourses, filters, sortBy]);
+
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilters((prev) => ({ ...prev, [name]: value }));
+    setVisibleCount(6); // Reset view on filter
   };
 
-  const filterByFee = (fee) => {
-    const numericFee = parseInt(fee.replace(/\D/g, ""));
-    if (filters.feeRange === "₹0 - ₹50,000") return numericFee <= 50000;
-    if (filters.feeRange === "₹50,001 - ₹1,00,000")
-      return numericFee > 50000 && numericFee <= 100000;
-    if (filters.feeRange === "₹1,00,001+") return numericFee > 100000;
-    return true;
-  };
-
-  const filteredCourses = coursesData
-    .filter(
-      (c) =>
-        (!filters.field ||
-          c.courseName.toLowerCase().includes(filters.field.toLowerCase())) &&
-        (!filters.location ||
-          c.location.toLowerCase().includes(filters.location.toLowerCase())) &&
-        (!filters.duration ||
-          c.duration.toLowerCase().includes(filters.duration.toLowerCase())) &&
-        (!filters.collegeType ||
-          c.type.toLowerCase().includes(filters.collegeType.toLowerCase())) &&
-        filterByFee(c.fee)
-    )
-    .sort((a, b) => {
-      if (sortBy === "Fees")
-        return (
-          parseInt(a.fee.replace(/\D/g, "")) -
-          parseInt(b.fee.replace(/\D/g, ""))
-        );
-      if (sortBy === "Ratings")
-        return b.tags.includes("Top Rated") - a.tags.includes("Top Rated");
-      return 0;
-    });
-
-  const visibleCourses = filteredCourses.slice(0, visibleCount);
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#020617] flex flex-col justify-center items-center text-blue-500 font-mono">
+        <div className="relative w-20 h-20 mb-4">
+          <div className="absolute inset-0 border-4 border-blue-500/20 rounded-full"></div>
+          <div className="absolute inset-0 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+        <p className="tracking-[0.2em] animate-pulse">
+          SYNCHRONIZING COURSE REPOSITORY...
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col min-h-screen font-poppins bg-gradient-to-b from-gray-950 via-gray-900 to-gray-900 text-gray-100">
-      <Header title={"Explore Courses / Colleges"} />
+    <div className="min-h-screen bg-[#020617] text-slate-200 font-poppins selection:bg-blue-500/30">
+      <Header title="Academic Course Explorer" />
 
-      <main className="flex-1 pt-28 px-4 md:px-6 flex flex-col gap-6">
-        {/* ===== Filters ===== */}
-        <div className="bg-gradient-to-r from-gray-800 via-blue-900/40 to-gray-800 border border-blue-500/20 p-4 rounded-2xl shadow-md flex flex-col md:flex-row flex-wrap gap-3 md:items-center">
-          <input
-            type="text"
-            name="field"
-            placeholder="Field of Study"
-            value={filters.field}
-            onChange={handleFilterChange}
-            className="p-2 border border-gray-600 rounded flex-1 bg-gray-900 text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-blue-400"
-          />
-          <input
-            type="text"
-            name="location"
-            placeholder="Location"
-            value={filters.location}
-            onChange={handleFilterChange}
-            className="p-2 border border-gray-600 rounded flex-1 bg-gray-900 text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-blue-400"
-          />
-          <select
-            name="duration"
-            value={filters.duration}
-            onChange={handleFilterChange}
-            className="p-2 border border-gray-600 rounded flex-1 bg-gray-900 text-gray-100 focus:ring-2 focus:ring-blue-400"
-          >
-            <option value="">Duration</option>
-            <option>3 Years</option>
-            <option>4 Years</option>
-          </select>
-          <select
-            name="feeRange"
-            value={filters.feeRange}
-            onChange={handleFilterChange}
-            className="p-2 border border-gray-600 rounded flex-1 bg-gray-900 text-gray-100 focus:ring-2 focus:ring-blue-400"
-          >
-            <option value="">Fee Range</option>
-            <option>₹0 - ₹50,000</option>
-            <option>₹50,001 - ₹1,00,000</option>
-            <option>₹1,00,001+</option>
-          </select>
-          <select
-            name="collegeType"
-            value={filters.collegeType}
-            onChange={handleFilterChange}
-            className="p-2 border border-gray-600 rounded flex-1 bg-gray-900 text-gray-100 focus:ring-2 focus:ring-blue-400"
-          >
-            <option value="">College Type</option>
-            <option>Private</option>
-            <option>Government</option>
-          </select>
+      <main className="max-w-[1400px] mx-auto px-6 pt-32 pb-24">
+        {/* --- Hero Section --- */}
+        <header className="mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-white via-blue-100 to-slate-500 bg-clip-text text-transparent mb-4">
+            Find Your Future Career
+          </h1>
+          <p className="text-slate-400 max-w-2xl text-lg">
+            Browse through specialized programs, compare fee structures, and
+            analyze placement statistics from top-tier institutions.
+          </p>
+        </header>
+
+        {/* --- Control Center (Search & Filters) --- */}
+        <section className="bg-slate-900/40 backdrop-blur-md border border-slate-800 p-6 rounded-3xl shadow-2xl mb-10">
+          <div className="flex flex-col xl:flex-row gap-6">
+            {/* Search Input */}
+            <div className="relative flex-1 group">
+              <Search
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-400 transition-colors"
+                size={20}
+              />
+              <input
+                type="text"
+                name="search"
+                placeholder="Search by course name or university..."
+                value={filters.search}
+                onChange={handleFilterChange}
+                className="w-full bg-slate-950/50 border border-slate-700 rounded-2xl py-4 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-base placeholder:text-slate-600"
+              />
+            </div>
+
+            {/* Filter Group */}
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-2 bg-slate-800/50 px-4 py-2 rounded-xl border border-slate-700 text-slate-400 text-sm mr-2">
+                <Filter size={16} /> Filters
+              </div>
+
+              <select
+                name="degreeType"
+                value={filters.degreeType}
+                onChange={handleFilterChange}
+                className="bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm outline-none focus:border-blue-500 cursor-pointer"
+              >
+                <option value="">All Degrees</option>
+                <option value="UG">Undergraduate (UG)</option>
+                <option value="PG">Postgraduate (PG)</option>
+              </select>
+
+              <select
+                name="feeRange"
+                value={filters.feeRange}
+                onChange={handleFilterChange}
+                className="bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm outline-none focus:border-blue-500 cursor-pointer"
+              >
+                <option value="">Any Fee Range</option>
+                <option value="0-1L">Under ₹1 Lakh</option>
+                <option value="1L-3L">₹1L - ₹3L</option>
+                <option value="3L+">Above ₹3L</option>
+              </select>
+
+              <div className="h-10 w-[1px] bg-slate-700 mx-2 hidden xl:block" />
+
+              <div className="flex items-center gap-3">
+                <span className="text-slate-500 text-sm whitespace-nowrap">
+                  Sort:
+                </span>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="bg-blue-600/10 border border-blue-500/30 text-blue-400 font-semibold rounded-xl px-4 py-3 text-sm outline-none cursor-pointer"
+                >
+                  <option>Popularity</option>
+                  <option>Highest Package</option>
+                  <option>Fees: Low to High</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* --- Results Count --- */}
+        <div className="flex items-center gap-3 mb-8 text-slate-400 text-sm">
+          <Layers size={18} className="text-blue-500" />
+          <span>
+            Showing{" "}
+            <strong className="text-white">{processedCourses.length}</strong>{" "}
+            specialized courses
+          </span>
         </div>
 
-        {/* ===== Sorting ===== */}
-        <div className="flex justify-end gap-4 items-center">
-          <span className="text-gray-400 text-sm">Sort by:</span>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="p-1 border border-gray-600 rounded bg-gray-900 text-gray-100 focus:ring-2 focus:ring-blue-400"
-          >
-            <option>Popularity</option>
-            <option>Fees</option>
-            <option>Ratings</option>
-          </select>
-        </div>
-
-        {/* ===== Courses Grid ===== */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {visibleCourses.map((course, idx) => (
+        {/* --- Courses Grid --- */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {processedCourses.slice(0, visibleCount).map((course) => (
             <div
-              key={idx}
-              className="bg-gradient-to-br from-gray-800 via-blue-900/40 to-gray-900 border border-blue-500/20 p-5 rounded-2xl shadow-md hover:shadow-blue-400/30 transition-all transform hover:-translate-y-1 cursor-pointer flex flex-col gap-2"
-              onClick={() => setSelectedCourse(course)}
+              key={course._id}
+              className="group relative bg-slate-900/40 border border-slate-800 hover:border-blue-500/50 rounded-[2rem] p-8 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(8,_112,_184,_0.1)] flex flex-col"
             >
-              <div className="flex items-center gap-2">
-                <img
-                  src={course.collegeLogo}
-                  alt={course.collegeName}
-                  className="w-10 h-10 rounded-full"
-                />
-                <div>
-                  <h4 className="font-semibold text-white">
-                    {course.courseName}
-                  </h4>
-                  <p className="text-gray-400 text-sm">{course.collegeName}</p>
+              {/* Top Choice Badge */}
+              {course.popularityScore > 90 && (
+                <div className="absolute -top-3 -right-3 bg-gradient-to-br from-blue-600 to-indigo-600 text-white text-[10px] font-bold px-4 py-1.5 rounded-full shadow-lg z-10">
+                  TRENDING #1
+                </div>
+              )}
+
+              {/* Course Header */}
+              <div className="mb-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="bg-blue-500/10 text-blue-400 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">
+                    {course.degreeType || "Program"}
+                  </span>
+                  <span className="flex items-center gap-1 text-slate-500 text-[10px] font-bold uppercase tracking-wider">
+                    <Clock size={12} /> {course.duration || "N/A"}
+                  </span>
+                </div>
+                <h3 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors duration-300 min-h-[3.5rem] leading-snug">
+                  {course.title}
+                </h3>
+                <div className="flex items-start gap-2 text-slate-400 text-sm mt-2">
+                  <MapPin size={16} className="shrink-0 mt-1 text-slate-600" />
+                  <p className="line-clamp-1">
+                    {course.parentCollege?.name} •{" "}
+                    <span className="text-slate-500">
+                      {course.parentCollege?.location?.city}
+                    </span>
+                  </p>
                 </div>
               </div>
-              <p className="text-gray-400 text-sm mt-1">
-                {course.duration} | {course.fee} | {course.mode}
-              </p>
-              <div className="flex flex-wrap gap-1 mt-2">
-                {course.tags.map((tag, i) => (
-                  <span
-                    key={i}
-                    className="text-xs bg-gradient-to-r from-blue-700 to-blue-500 text-white px-2 py-1 rounded-full"
-                  >
-                    {tag}
+
+              {/* Stats Panel */}
+              <div className="grid grid-cols-2 gap-4 p-5 bg-slate-950/60 rounded-2xl border border-slate-800 mb-8">
+                <div className="space-y-1">
+                  <span className="text-[10px] text-slate-500 font-bold uppercase flex items-center gap-1">
+                    <IndianRupee size={12} /> Annual Fee
                   </span>
-                ))}
+                  <p className="text-lg font-mono font-semibold text-slate-100">
+                    {formatCurrency(course.feeStructure?.perYear)}
+                  </p>
+                </div>
+                <div className="space-y-1 border-l border-slate-800 pl-4">
+                  <span className="text-[10px] text-slate-500 font-bold uppercase flex items-center gap-1">
+                    <Briefcase size={12} /> Avg Salary
+                  </span>
+                  <p className="text-lg font-mono font-bold text-emerald-400">
+                    {formatCurrency(course.placementStats?.averagePackage)}
+                  </p>
+                </div>
               </div>
-              <button className="mt-2 px-3 py-2 bg-gradient-to-r from-blue-600 to-blue-400 text-white rounded-lg hover:shadow-blue-400/40 hover:scale-[1.03] transition text-sm">
-                View Details / Apply
-              </button>
+
+              {/* Action Button */}
+              <div className="mt-auto">
+                <Link
+                  to={`/course/view/${course._id}`}
+                  className="group/btn w-full py-4 bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white rounded-2xl flex items-center justify-center gap-3 font-bold transition-all duration-300"
+                >
+                  Program Analytics
+                  <ArrowRight
+                    size={18}
+                    className="group-hover/btn:translate-x-1 transition-transform"
+                  />
+                </Link>
+              </div>
             </div>
           ))}
         </div>
 
-        {/* ===== Load More Button ===== */}
-        {visibleCount < filteredCourses.length && (
-          <div className="flex justify-center mt-4">
+        {/* --- Pagination --- */}
+        {visibleCount < processedCourses.length && (
+          <div className="mt-16 flex justify-center">
             <button
-              onClick={() => setVisibleCount((prev) => prev + 3)}
-              className="px-5 py-2 bg-gradient-to-r from-blue-600 to-blue-400 text-white rounded-lg shadow-md hover:shadow-blue-400/40 hover:scale-[1.03] transition"
+              onClick={() => setVisibleCount((prev) => prev + 6)}
+              className="flex items-center gap-3 px-10 py-4 bg-transparent border-2 border-slate-800 text-slate-400 rounded-full hover:bg-slate-800 hover:text-white transition-all font-bold group"
             >
-              Load More
+              Load More Programs
+              <div className="w-2 h-2 bg-blue-500 rounded-full group-hover:animate-ping" />
             </button>
           </div>
         )}
-      </main>
 
-      {/* ===== Course Detail Modal ===== */}
-      {selectedCourse && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-gradient-to-br from-gray-900 via-blue-900/30 to-gray-900 border border-blue-500/20 rounded-2xl p-6 max-w-lg w-full relative shadow-xl flex flex-col gap-4">
-            <button
-              className="absolute top-4 right-4 text-gray-400 hover:text-white transition"
-              onClick={() => setSelectedCourse(null)}
-            >
-              <X size={20} />
-            </button>
-            <h3 className="text-xl font-semibold text-blue-400">
-              {selectedCourse.courseName}
+        {/* --- Empty State --- */}
+        {processedCourses.length === 0 && (
+          <div className="text-center py-20 bg-slate-900/20 border border-dashed border-slate-800 rounded-[3rem]">
+            <GraduationCap size={48} className="mx-auto text-slate-700 mb-4" />
+            <h3 className="text-xl font-bold text-slate-500">
+              No courses match your filters
             </h3>
-            <p className="text-gray-300">{selectedCourse.collegeName}</p>
-            <p className="text-gray-200 text-sm">{selectedCourse.overview}</p>
-            <p className="text-gray-400 text-sm">
-              <strong>Eligibility:</strong> {selectedCourse.eligibility}
+            <p className="text-slate-600 mt-2">
+              Try adjusting your search or resetting the filters.
             </p>
-            <p className="text-gray-400 text-sm">
-              <strong>Admission Process:</strong>{" "}
-              {selectedCourse.admissionProcess}
-            </p>
-            <button className="mt-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-400 text-white rounded-lg hover:shadow-blue-400/40 hover:scale-[1.03] transition">
-              Apply Now
-            </button>
           </div>
-        </div>
-      )}
-
-      {/* ===== Floating Chat Button ===== */}
-      <button className="fixed bottom-6 right-6 bg-gradient-to-r from-blue-600 to-blue-400 text-white p-4 rounded-full shadow-lg hover:shadow-blue-400/40 hover:scale-[1.05] transition flex items-center gap-2">
-        <MessageCircle size={20} /> Chat with Counselor
-      </button>
+        )}
+      </main>
     </div>
   );
 }
-
-export default CoursesCollegeExplorer;

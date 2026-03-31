@@ -25,8 +25,10 @@ export const CourseProvider = ({ children }) => {
   // ====================================================
   const getAllCourses = async (filters = {}) => {
     try {
+      console.log("come here");
       setLoading(true);
       const res = await axiosAuth.get("/", { params: filters });
+      console.log({ res });
       setCourses(res.data.courses);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to fetch courses");

@@ -46,6 +46,28 @@ export const CollegeProvider = ({ children }) => {
     }
   };
 
+  const fetchAllColleges = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`${API_URL}/api/college/all`);
+
+      const data = await res.json();
+      if (res.ok) {
+        setError("");
+        return data.colleges || [];
+      } else {
+        setError(data.message || "Failed to load colleges.");
+        return [];
+      }
+    } catch (err) {
+      console.error("Fetch error:", err);
+      setError("Error loading colleges.");
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  };
+
   /* ----------------------------------------------------------
      🔹 Add New College
   ---------------------------------------------------------- */
@@ -169,6 +191,7 @@ export const CollegeProvider = ({ children }) => {
         deleteCollege,
         getCollegeById,
         setSelectedCollege,
+        fetchAllColleges,
       }}
     >
       {children}

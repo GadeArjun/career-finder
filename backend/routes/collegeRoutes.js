@@ -7,12 +7,14 @@ const {
   updateCollege,
   updateCollegeStatus,
   deleteCollege,
+  getAllColleges,
 } = require("../controllers/collegeController");
 const { protect, authorize } = require("../middleware/auth");
 
 // Owner
 router.post("/", protect, authorize("college", "admin"), addCollege);
 router.get("/my", protect, authorize("college", "admin"), getMyColleges);
+router.get("/all", getAllColleges);
 router.post("/:id", protect, authorize("college", "admin"), updateCollege);
 router.delete("/:id", protect, authorize("college", "admin"), deleteCollege);
 

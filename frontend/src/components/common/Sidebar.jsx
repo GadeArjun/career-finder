@@ -30,15 +30,15 @@ const Sidebar = () => {
       path: "/student/recommendations",
     },
     {
-      name: "Explore Courses / Colleges",
+      name: "Explore Courses",
       icon: <Compass size={20} />,
       path: "/student/explore-courses-college",
     },
-    {
-      name: "Guidance Resources & Learning Path",
-      icon: <GraduationCap size={20} />,
-      path: "/student/guidance-resources-path",
-    },
+    // {
+    //   name: "Guidance Resources & Learning Path",
+    //   icon: <GraduationCap size={20} />,
+    //   path: "/student/guidance-resources-path",
+    // },
     { name: "My Profile", icon: <User size={20} />, path: "/student/profile" },
     {
       name: "Settings",

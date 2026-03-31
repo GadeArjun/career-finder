@@ -107,6 +107,26 @@ exports.getMyColleges = async (req, res) => {
   }
 };
 
+exports.getAllColleges = async (req, res) => {
+  try {
+    const colleges = await College.find({}).sort({
+      createdAt: -1,
+    });
+
+    if (!colleges || !colleges.length) {
+      return res.status(404).json({ message: "No colleges found." });
+    }
+
+    res.json({
+      count: colleges.length,
+      colleges: colleges,
+    });
+  } catch (err) {
+    console.error("❌ Error fetching owner colleges:", err);
+    res.status(500).json({ message: "Server error fetching colleges." });
+  }
+};
+
 /* -------------------------------------------------------------------
    @desc   Update college details
    @route  PUT /api/colleges/:id

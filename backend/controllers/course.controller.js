@@ -114,12 +114,20 @@ exports.getAllCourses = async (req, res) => {
     if (branch) filter.branch = branch;
     if (mode) filter.mode = mode;
     if (domain) filter.careerDomains = domain;
+    const filterCount = Object.keys(filter).length;
+    let courses = [];
 
-    const courses = await Course.find(filter)
-      .populate("collegeId", "name logo location")
-      .sort({ popularityScore: -1, createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(Number(limit));
+    if (filterCount === 1) {
+      courses = await Course.find(filter)
+        .populate("collegeId", "name logo location")
+        .sort({ popularityScore: -1, createdAt: -1 });
+    } else {
+      courses = await Course.find(filter)
+        .populate("collegeId", "name logo location")
+        .sort({ popularityScore: -1, createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(Number(limit));
+    }
 
     const total = await Course.countDocuments(filter);
 
