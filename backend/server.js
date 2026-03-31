@@ -38,7 +38,7 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "public" , "dist")));
 
 // Routes
 app.use("/api/users", userRouter);
@@ -57,7 +57,7 @@ app.get("/api/ai/history", protect, getHistory);
 
 // For any route not starting with /api, serve React
 app.get(/^(?!\/api).*/, (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  res.sendFile(path.join(__dirname, "public", "dist", "index.html"));
 });
 
 const PORT = process.env.PORT || 5000;
