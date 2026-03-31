@@ -6,7 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "build-client": "cd ../client && npm install && npm run build && rm -rf public && mv build public",
+    "vercel-build": "npm run build-client"
   },
   "keywords": [],
   "author": "",
