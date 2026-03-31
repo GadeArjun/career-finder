@@ -8,7 +8,7 @@ function Header({ title }) {
   const navigate = useNavigate();
 
   return (
-    <header className="flex justify-between items-center fixed top-0 left-0 w-full z-[100] px-6 py-2 bg-gray-900/80 backdrop-blur-md border-b border-gray-800 shadow-lg">
+    <header className="flex justify-between items-center fixed top-0 left-0 w-full z-[20] px-6 py-2 bg-gray-900/80 backdrop-blur-md border-b border-gray-800 shadow-lg">
       {/* ===== Title (Center) ===== */}
       <div className="text-lg md:text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-yellow-400 to-blue-500 tracking-wide">
         {title}

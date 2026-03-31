@@ -66,10 +66,10 @@ const AIChatWidget = () => {
   const handleInputChange = (e) => {
     setInput(e.target.value);
     if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
+      //   textareaRef.current.style.height = "auto";
       textareaRef.current.style.height = `${Math.min(
         textareaRef.current.scrollHeight,
-        120
+        150
       )}px`;
     }
   };
@@ -108,15 +108,60 @@ const AIChatWidget = () => {
 
       const aiData = res.data?.data || {};
 
-      const aiMessage = {
-        role: "ai",
-        content:
-          aiData.message || "Sorry, I couldn't generate a response right now.",
-        insights: aiData.insights,
-        recommendations: aiData.recommendations,
-        nextSteps: aiData.nextSteps,
-        followUpQuestions: aiData.followUpQuestions,
+      /**
+       * Safely normalize AI response to prevent React crashes
+       */
+      const normalizeAIData = (aiData = {}) => {
+        const safeString = (value) => {
+          if (value === null || value === undefined) return "";
+          if (typeof value === "string") return value;
+          if (typeof value === "number" || typeof value === "boolean")
+            return String(value);
+          try {
+            return JSON.stringify(value, null, 2);
+          } catch {
+            return "[Unrenderable content]";
+          }
+        };
+
+        const safeArray = (arr) => {
+          if (!Array.isArray(arr)) return [];
+          return arr.map((item) => safeString(item));
+        };
+
+        const safeJobsArray = (arr) => {
+          if (!Array.isArray(arr)) return [];
+          return arr.map((job) => {
+            if (typeof job === "string") return job;
+            if (typeof job === "object" && job !== null) {
+              return `${job.title || "Unknown Role"}${
+                job.company ? " at " + job.company : ""
+              }${job.location ? " (" + job.location + ")" : ""}`;
+            }
+            return safeString(job);
+          });
+        };
+
+        return {
+          role: "ai",
+          content:
+            safeString(aiData?.message) ||
+            "Sorry, I couldn't generate a response right now.",
+          insights: {
+            strengths: safeArray(aiData?.insights?.strengths),
+            weaknesses: safeArray(aiData?.insights?.weaknesses),
+          },
+          recommendations: {
+            courses: safeArray(aiData?.recommendations?.courses),
+            jobs: safeJobsArray(aiData?.recommendations?.jobs),
+          },
+          nextSteps: safeArray(aiData?.nextSteps),
+          followUpQuestions: safeArray(aiData?.followUpQuestions).slice(0, 5), // max 5
+        };
       };
+
+      // Usage:
+      const aiMessage = normalizeAIData(aiData);
 
       setMessages((prev) => [...prev, aiMessage]);
     } catch (err) {
@@ -140,8 +185,62 @@ const AIChatWidget = () => {
     }
   };
 
+  /**
+   * Normalize AI message to prevent React errors and safely render all content.
+   * Converts objects to readable strings, ensures arrays exist, slices follow-ups.
+   */
+  const normalizeAIMessage = (msg = {}) => {
+    // Helper: safely stringify any value (object/array/string/number)
+    const safeString = (value) => {
+      if (value === null || value === undefined) return "";
+      if (typeof value === "string") return value;
+      if (typeof value === "number" || typeof value === "boolean")
+        return String(value);
+      try {
+        return JSON.stringify(value, null, 2);
+      } catch {
+        return "[Unrenderable content]";
+      }
+    };
+
+    // Helper: safely process array, fallback to empty array, map to strings if needed
+    const safeArray = (arr) => {
+      if (!Array.isArray(arr)) return [];
+      return arr.map((item) => safeString(item));
+    };
+
+    return {
+      content:
+        safeString(msg.content) ||
+        "Sorry, I couldn't generate a response right now.",
+      insights: {
+        strengths: safeArray(msg?.insights?.strengths),
+        weaknesses: safeArray(msg?.insights?.weaknesses),
+      },
+      recommendations: {
+        courses: safeArray(msg?.recommendations?.courses),
+        // For jobs: if object, stringify nicely
+        jobs: (msg?.recommendations?.jobs || []).map((job) => {
+          if (typeof job === "string") return job;
+          if (typeof job === "object" && job !== null) {
+            // Custom display: title + company
+            return `${job.title || "Unknown Role"}${
+              job.company ? " at " + job.company : ""
+            }`;
+          }
+          return safeString(job);
+        }),
+      },
+      nextSteps: safeArray(msg.nextSteps),
+      followUpQuestions: safeArray(msg.followUpQuestions).slice(0, 5),
+    };
+  };
+
   // Rich structured AI message renderer (perfectly matches your JSON format)
   const renderStructuredAIMessage = (msg) => {
+    // Normalize msg safely
+    const safeMsg = normalizeAIMessage(msg);
+
     return (
       <motion.div
         initial={{ opacity: 0, y: 10 }}
@@ -157,11 +256,12 @@ const AIChatWidget = () => {
           <div className="flex-1 space-y-4">
             {/* Main Message */}
             <div className="px-4 py-3 bg-slate-900/90 border border-white/5 rounded-2xl rounded-tl-none text-slate-200 text-sm leading-relaxed whitespace-pre-line shadow-xl">
-              {msg.content}
+              {safeMsg.content}
             </div>
 
-            {/* Insights - Strengths & Weaknesses */}
-            {msg.insights && (
+            {/* Insights */}
+            {safeMsg.insights.strengths.length > 0 ||
+            safeMsg.insights.weaknesses.length > 0 ? (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -180,7 +280,7 @@ const AIChatWidget = () => {
                       <Award size={14} /> Strengths
                     </p>
                     <ul className="space-y-1.5 text-slate-300">
-                      {msg.insights.strengths?.map((item, i) => (
+                      {safeMsg.insights.strengths.map((item, i) => (
                         <li
                           key={i}
                           className="flex items-start gap-1.5 text-[13px]"
@@ -199,7 +299,7 @@ const AIChatWidget = () => {
                       <ShieldCheck size={14} /> To Improve
                     </p>
                     <ul className="space-y-1.5 text-slate-300">
-                      {msg.insights.weaknesses?.map((item, i) => (
+                      {safeMsg.insights.weaknesses.map((item, i) => (
                         <li
                           key={i}
                           className="flex items-start gap-1.5 text-[13px]"
@@ -212,13 +312,14 @@ const AIChatWidget = () => {
                   </div>
                 </div>
               </motion.div>
-            )}
+            ) : null}
 
-            {/* Recommendations - Courses & Jobs */}
-            {msg.recommendations && (
+            {/* Recommendations */}
+            {(safeMsg.recommendations.courses.length > 0 ||
+              safeMsg.recommendations.jobs.length > 0) && (
               <div className="space-y-3">
                 {/* Courses */}
-                {msg.recommendations.courses?.length > 0 && (
+                {safeMsg.recommendations.courses.length > 0 && (
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -232,7 +333,7 @@ const AIChatWidget = () => {
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {msg.recommendations.courses.map((course, i) => (
+                      {safeMsg.recommendations.courses.map((course, i) => (
                         <span
                           key={i}
                           className="bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/20 transition-colors rounded-xl px-3 py-1.5 text-[13px] text-blue-300 font-medium"
@@ -245,7 +346,7 @@ const AIChatWidget = () => {
                 )}
 
                 {/* Jobs */}
-                {msg.recommendations.jobs?.length > 0 && (
+                {safeMsg.recommendations.jobs.length > 0 && (
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -259,7 +360,7 @@ const AIChatWidget = () => {
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {msg.recommendations.jobs.map((job, i) => (
+                      {safeMsg.recommendations.jobs.map((job, i) => (
                         <span
                           key={i}
                           className="bg-violet-600/10 hover:bg-violet-600/20 border border-violet-500/20 transition-colors rounded-xl px-3 py-1.5 text-[13px] text-violet-300 font-medium"
@@ -274,7 +375,7 @@ const AIChatWidget = () => {
             )}
 
             {/* Next Steps */}
-            {msg.nextSteps?.length > 0 && (
+            {safeMsg.nextSteps.length > 0 && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -288,7 +389,7 @@ const AIChatWidget = () => {
                   </span>
                 </div>
                 <ol className="space-y-3 text-[13px] text-slate-300">
-                  {msg.nextSteps.map((step, i) => (
+                  {safeMsg.nextSteps.map((step, i) => (
                     <li key={i} className="flex gap-3 items-start">
                       <span className="font-mono bg-blue-500/20 text-blue-400 border border-blue-500/20 w-5 h-5 flex items-center justify-center rounded-md text-xs font-bold flex-shrink-0 mt-0.5">
                         {i + 1}
@@ -300,8 +401,8 @@ const AIChatWidget = () => {
               </motion.div>
             )}
 
-            {/* Follow-up Questions - Clickable */}
-            {msg.followUpQuestions?.length > 0 && (
+            {/* Follow-up Questions */}
+            {safeMsg.followUpQuestions.length > 0 && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -312,7 +413,7 @@ const AIChatWidget = () => {
                   Suggested Context Actions
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {msg.followUpQuestions.map((q, i) => (
+                  {safeMsg.followUpQuestions.map((q, i) => (
                     <button
                       key={i}
                       onClick={() => handleFollowUpClick(q)}
@@ -331,7 +432,7 @@ const AIChatWidget = () => {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-[9999] font-sans antialiased">
+    <div className="font-sans antialiased">
       <AnimatePresence>
         {/* Floating AI Button */}
         {!open && (
@@ -340,7 +441,7 @@ const AIChatWidget = () => {
             animate={{ scale: 1, rotate: 0 }}
             exit={{ scale: 0, rotate: 45 }}
             onClick={toggleOpen}
-            className="group relative w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 p-px shadow-[0_10px_30px_rgba(79,70,229,0.35)] hover:shadow-[0_15px_40px_rgba(79,70,229,0.5)] transition-all duration-300"
+            className="fixed bottom-6 right-6 z-[9999] group w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 p-px shadow-[0_10px_30px_rgba(79,70,229,0.35)] hover:shadow-[0_15px_40px_rgba(79,70,229,0.5)] transition-all duration-300"
           >
             <div className="w-full h-full bg-slate-950 rounded-[15px] flex items-center justify-center group-hover:bg-slate-900/50 transition-colors">
               <Sparkles
@@ -356,7 +457,7 @@ const AIChatWidget = () => {
           </motion.button>
         )}
 
-        {/* Chat Window - Premium & Fully Responsive */}
+        {/* Chat Window - Immersive Full Screen */}
         {open && (
           <motion.div
             initial={{
@@ -367,130 +468,137 @@ const AIChatWidget = () => {
             }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 40, scale: 0.95 }}
-            className="w-[92vw] sm:w-[420px] h-[680px] max-h-[85vh] bg-slate-950/95 border border-white/10 rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.6)] flex flex-col overflow-hidden backdrop-blur-2xl"
+            className="fixed inset-0 z-[9999] w-screen h-screen bg-slate-950 flex flex-col overflow-hidden backdrop-blur-2xl"
           >
             {/* Header */}
-            <div className="px-6 py-4.5 border-b border-white/5 bg-slate-900/40 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center border border-blue-500/20 shadow-inner">
-                  <Bot size={22} className="text-blue-400" />
-                </div>
-                <div>
-                  <h3 className="text-white font-bold text-sm tracking-tight">
-                    Career Intelligence
-                  </h3>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className="h-1.5 w-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
-                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                      Model Active • Live
-                    </span>
+            <div className="px-6 py-4.5 border-b border-white/5 bg-slate-900/40">
+              <div className="max-w-5xl mx-auto w-full flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center border border-blue-500/20 shadow-inner">
+                    <Bot size={22} className="text-blue-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-bold text-sm tracking-tight">
+                      Career Intelligence
+                    </h3>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span className="h-1.5 w-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                        Model Active • Live
+                      </span>
+                    </div>
                   </div>
                 </div>
+                <button
+                  onClick={toggleOpen}
+                  className="p-2.5 hover:bg-white/5 rounded-full text-slate-400 hover:text-white transition-colors"
+                >
+                  <X size={20} />
+                </button>
               </div>
-              <button
-                onClick={toggleOpen}
-                className="p-2.5 hover:bg-white/5 rounded-full text-slate-400 hover:text-white transition-colors"
-              >
-                <X size={20} />
-              </button>
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-5 space-y-6 scrollbar-hide">
-              {messages.map((msg, idx) => (
-                <React.Fragment key={idx}>
-                  {msg.role === "user" ? (
-                    // User Message
-                    <div className="flex justify-end">
-                      <div className="flex gap-3 max-w-[85%] flex-row-reverse">
-                        <div className="mt-1 flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center shadow-md">
-                          <User size={16} className="text-slate-300" />
-                        </div>
-                        <div className="px-4 py-3 bg-gradient-to-tr from-blue-600 to-indigo-600 text-white rounded-2xl rounded-tr-none text-sm leading-relaxed shadow-lg shadow-blue-900/20">
-                          {msg.content}
-                        </div>
-                      </div>
-                    </div>
-                  ) : // AI Message
-                  msg.insights ||
-                    msg.recommendations ||
-                    msg.nextSteps ||
-                    msg.followUpQuestions ? (
-                    renderStructuredAIMessage(msg)
-                  ) : (
-                    // Simple AI message (fallback)
-                    <div className="flex justify-start">
-                      <div className="flex gap-3 max-w-[85%]">
-                        <div className="mt-1 flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 border border-blue-400/30 flex items-center justify-center shadow-lg">
-                          <Bot size={18} className="text-white" />
-                        </div>
-                        <div className="px-4 py-3 bg-slate-900/90 border border-white/5 rounded-2xl rounded-tl-none text-slate-200 text-sm leading-relaxed shadow-md">
-                          {msg.content}
+            <div className="flex-1 overflow-y-auto p-1 md:p-4 scrollbar-hide">
+              <div className="max-w-5xl mx-auto w-full space-y-6">
+                {messages.map((msg, idx) => (
+                  <React.Fragment key={idx}>
+                    {msg.role === "user" ? (
+                      // User Message
+                      <div className="flex justify-end">
+                        <div className="flex gap-3 max-w-[85%] flex-row-reverse">
+                          <div className="mt-1 flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center shadow-md">
+                            <User size={16} className="text-slate-300" />
+                          </div>
+                          <div className="px-4 py-3 bg-gradient-to-tr from-blue-600 to-indigo-600 text-white rounded-2xl rounded-tr-none text-sm leading-relaxed shadow-lg shadow-blue-900/20">
+                            {msg.content}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
-                </React.Fragment>
-              ))}
+                    ) : // AI Message
+                    msg.insights ||
+                      msg.recommendations ||
+                      msg.nextSteps ||
+                      msg.followUpQuestions ? (
+                      renderStructuredAIMessage(msg)
+                    ) : (
+                      // Simple AI message (fallback)
+                      <div className="flex justify-start">
+                        <div className="flex gap-3 max-w-[85%]">
+                          <div className="mt-1 flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 border border-blue-400/30 flex items-center justify-center shadow-lg">
+                            <Bot size={18} className="text-white" />
+                          </div>
+                          <div className="px-4 py-3 bg-slate-900/90 border border-white/5 rounded-2xl rounded-tl-none text-slate-200 text-sm leading-relaxed shadow-md">
+                            {msg.content}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </React.Fragment>
+                ))}
 
-              {/* Loading Indicator */}
-              {loading && (
-                <div className="flex gap-3">
-                  <div className="mt-1 flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center">
-                    <Bot size={18} className="text-slate-500" />
-                  </div>
-                  <div className="px-4 py-3 bg-slate-900/90 border border-white/5 rounded-2xl rounded-tl-none flex items-center gap-3 shadow-md">
-                    <div className="flex gap-1.5">
-                      <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce"></span>
-                      <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:160ms]"></span>
-                      <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:320ms]"></span>
+                {/* Loading Indicator */}
+                {loading && (
+                  <div className="flex gap-3">
+                    <div className="mt-1 flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center">
+                      <Bot size={18} className="text-slate-500" />
                     </div>
-                    <span className="text-slate-400 text-[13px] font-medium">
-                      crunching data...
-                    </span>
+                    <div className="px-4 py-3 bg-slate-900/90 border border-white/5 rounded-2xl rounded-tl-none flex items-center gap-3 shadow-md">
+                      <div className="flex gap-1.5">
+                        <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce"></span>
+                        <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:160ms]"></span>
+                        <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:320ms]"></span>
+                      </div>
+                      <span className="text-slate-400 text-[13px] font-medium">
+                        crunching data...
+                      </span>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              <div ref={messagesEndRef} />
+                <div ref={messagesEndRef} />
+              </div>
             </div>
 
             {/* Input Area */}
             <div className="p-4.5 bg-slate-950/80 border-t border-white/5 backdrop-blur-sm">
-              <div className="relative flex items-center bg-slate-900/90 border border-white/5 focus-within:border-blue-500/50 focus-within:ring-2 focus-within:ring-blue-500/10 rounded-2xl p-1.5 shadow-inner transition-all">
-                <textarea
-                  ref={textareaRef}
-                  rows={1}
-                  value={input}
-                  onChange={handleInputChange}
-                  onKeyDown={handleKeyPress}
-                  placeholder="Inquire about your career path..."
-                  className="flex-1 bg-transparent text-slate-200 text-sm py-3 px-3.5 outline-none resize-none max-h-[120px] placeholder:text-slate-600"
-                />
-                <button
-                  onClick={() => sendMessage()}
-                  disabled={!input.trim() || loading}
-                  className={`p-3 rounded-xl transition-all ${
-                    input.trim()
-                      ? "bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-600/30 hover:scale-[1.03] active:scale-[0.98]"
-                      : "bg-slate-800 text-slate-600 cursor-not-allowed"
-                  }`}
-                >
-                  {loading ? (
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  ) : (
-                    <CornerDownLeft size={20} />
-                  )}
-                </button>
-              </div>
+              <div className="max-w-5xl mx-auto w-full">
+                <div className="relative flex items-center bg-slate-900/90 border border-white/5 focus-within:border-blue-500/50 focus-within:ring-2 focus-within:ring-blue-500/10 rounded-2xl p-1.5 shadow-inner transition-all">
+                  <textarea
+                    ref={textareaRef}
+                    rows={1}
+                    value={input}
+                    onChange={handleInputChange}
+                    onKeyDown={handleKeyPress}
+                    placeholder="Inquire about your career path..."
+                    className="flex-1 bg-transparent text-slate-200 text-sm py-3 px-3.5 outline-none resize-none max-h-[120px] placeholder:text-slate-600"
+                  />
+                  <button
+                    onClick={() => sendMessage()}
+                    disabled={!input.trim() || loading}
+                    className={`p-3 rounded-xl transition-all ${
+                      input.trim()
+                        ? "bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-600/30 hover:scale-[1.03] active:scale-[0.98]"
+                        : "bg-slate-800 text-slate-600 cursor-not-allowed"
+                    }`}
+                  >
+                    {loading ? (
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <CornerDownLeft size={20} />
+                    )}
+                  </button>
+                </div>
 
-              <div className="flex items-center justify-between mt-3 px-1">
-                <span className="text-[10px] text-slate-600 font-bold uppercase tracking-widest">
-                  CareerFinder Protocol v3.0
-                </span>
-                <span className="text-[10px] text-emerald-500/80 font-bold uppercase tracking-wider flex items-center gap-1">
-                  <div className="w-1 h-1 bg-current rounded-full" /> Protected
-                </span>
+                <div className="flex items-center justify-between mt-3 px-1">
+                  <span className="text-[10px] text-slate-600 font-bold uppercase tracking-widest">
+                    CareerFinder Protocol v3.0
+                  </span>
+                  <span className="text-[10px] text-emerald-500/80 font-bold uppercase tracking-wider flex items-center gap-1">
+                    <div className="w-1 h-1 bg-current rounded-full" />{" "}
+                    Protected
+                  </span>
+                </div>
               </div>
             </div>
           </motion.div>
