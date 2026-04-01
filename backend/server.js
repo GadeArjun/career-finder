@@ -38,7 +38,7 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "public" , "dist")));
+app.use(express.static(path.join(__dirname, "public", "dist")));
 
 // Routes
 app.use("/api/users", userRouter);
@@ -54,9 +54,8 @@ app.get("/api/student/dashboard", protect, getDashboardInsights);
 app.post("/api/ai/chat", protect, chat);
 app.get("/api/ai/history", protect, getHistory);
 
-
 // For any route not starting with /api, serve React
-app.get(/^(?!\/api).*/, (req, res) => {
+app.get(/.*/, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "dist", "index.html"));
 });
 
