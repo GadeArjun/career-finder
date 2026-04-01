@@ -12,6 +12,8 @@ import {
   ArrowRight,
   ShieldCheck,
   CheckCircle2,
+  Target,
+  BrainCircuit,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
@@ -501,41 +503,106 @@ const AIChatWidget = () => {
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto p-1 md:p-4 scrollbar-hide">
               <div className="max-w-5xl mx-auto w-full space-y-6">
-                {messages.map((msg, idx) => (
-                  <React.Fragment key={idx}>
-                    {msg.role === "user" ? (
-                      // User Message
-                      <div className="flex justify-end">
-                        <div className="flex gap-3 max-w-[85%] flex-row-reverse">
-                          <div className="mt-1 flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center shadow-md">
-                            <User size={16} className="text-slate-300" />
-                          </div>
-                          <div className="px-4 py-3 bg-gradient-to-tr from-blue-600 to-indigo-600 text-white rounded-2xl rounded-tr-none text-sm leading-relaxed shadow-lg shadow-blue-900/20">
-                            {msg.content}
+                {messages.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full text-center p-6 space-y-6 min-h-[350px]">
+                    {/* Glowing Bot Icon */}
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-full blur-xl opacity-40 animate-pulse"></div>
+                      <div className="relative w-16 h-16 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+                        <Bot size={32} className="text-white" />
+                      </div>
+                    </div>
+
+                    {/* Text Context */}
+                    <div>
+                      <h3 className="text-xl font-bold text-white mb-2">
+                        No messages yet
+                      </h3>
+                      <p className="text-slate-400 text-sm max-w-sm mx-auto leading-relaxed">
+                        I'm your AI career co-pilot. Ask me anything about your
+                        6D profile, or click a prompt below to get started!
+                      </p>
+                    </div>
+
+                    {/* Interactive Quick-Action Suggestions */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-md mt-4">
+                      {[
+                        {
+                          text: "What careers fit high analytical skills?",
+                          icon: Target,
+                        },
+                        {
+                          text: "Show me top colleges for AI engineering",
+                          icon: BookOpen,
+                        },
+                        {
+                          text: "How do I become a Product Manager?",
+                          icon: Briefcase,
+                        },
+                        {
+                          text: "Tell me more about the 6D model",
+                          icon: BrainCircuit,
+                        },
+                      ].map((suggestion, idx) => (
+                        <button
+                          key={idx}
+                          className="text-left p-3.5 text-xs bg-slate-900 border border-slate-800 rounded-xl text-slate-300 hover:border-cyan-500/50 hover:bg-slate-800/50 transition-all flex items-start gap-3 group"
+                          onClick={() => handleFollowUpClick(suggestion.text)}
+                        >
+                          <suggestion.icon
+                            size={16}
+                            className="text-cyan-400 opacity-70 group-hover:opacity-100 group-hover:scale-110 transition-all shrink-0 mt-0.5"
+                          />
+                          <span className="group-hover:text-white transition-colors">
+                            {suggestion.text}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Active Status Indicator */}
+                    <div className="pt-2 flex items-center gap-2 text-[10px] text-slate-600 font-mono uppercase tracking-widest">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                      System Online & Ready
+                    </div>
+                  </div>
+                ) : (
+                  messages.map((msg, idx) => (
+                    <React.Fragment key={idx}>
+                      {msg.role === "user" ? (
+                        // User Message
+                        <div className="flex justify-end">
+                          <div className="flex gap-3 max-w-[85%] flex-row-reverse">
+                            <div className="mt-1 flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center shadow-md">
+                              <User size={16} className="text-slate-300" />
+                            </div>
+                            <div className="px-4 py-3 bg-gradient-to-tr from-blue-600 to-indigo-600 text-white rounded-2xl rounded-tr-none text-sm leading-relaxed shadow-lg shadow-blue-900/20">
+                              {msg.content}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ) : // AI Message
-                    msg.insights ||
-                      msg.recommendations ||
-                      msg.nextSteps ||
-                      msg.followUpQuestions ? (
-                      renderStructuredAIMessage(msg)
-                    ) : (
-                      // Simple AI message (fallback)
-                      <div className="flex justify-start">
-                        <div className="flex gap-3 max-w-[85%]">
-                          <div className="mt-1 flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 border border-blue-400/30 flex items-center justify-center shadow-lg">
-                            <Bot size={18} className="text-white" />
-                          </div>
-                          <div className="px-4 py-3 bg-slate-900/90 border border-white/5 rounded-2xl rounded-tl-none text-slate-200 text-sm leading-relaxed shadow-md">
-                            {msg.content}
+                      ) : // AI Message
+                      msg.insights ||
+                        msg.recommendations ||
+                        msg.nextSteps ||
+                        msg.followUpQuestions ? (
+                        renderStructuredAIMessage(msg)
+                      ) : (
+                        // Simple AI message (fallback)
+                        <div className="flex justify-start">
+                          <div className="flex gap-3 max-w-[85%]">
+                            <div className="mt-1 flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 border border-blue-400/30 flex items-center justify-center shadow-lg">
+                              <Bot size={18} className="text-white" />
+                            </div>
+                            <div className="px-4 py-3 bg-slate-900/90 border border-white/5 rounded-2xl rounded-tl-none text-slate-200 text-sm leading-relaxed shadow-md">
+                              {msg.content}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    )}
-                  </React.Fragment>
-                ))}
+                      )}
+                    </React.Fragment>
+                  ))
+                )}
 
                 {/* Loading Indicator */}
                 {loading && (

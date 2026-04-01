@@ -1,38 +1,53 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Facebook, Twitter, Instagram, Linkedin, Send } from "lucide-react";
+import {
+  Facebook,
+  Twitter,
+  Instagram,
+  Linkedin,
+  Send,
+  Cpu,
+  ShieldCheck,
+} from "lucide-react";
 import { useUserContext } from "../../context/UserContext";
 
 function Footer() {
   const { user } = useUserContext();
 
   return (
-    <footer className="bg-gradient-to-b from-gray-900 via-gray-950 to-black text-gray-300 pt-16 pb-8 border-t border-gray-800 shadow-[0_-2px_20px_rgba(0,0,0,0.5)]">
+    <footer className="bg-slate-950 text-slate-400 pt-16 pb-8 border-t border-slate-800/50 relative overflow-hidden">
+      {/* Background Subtle Glow */}
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent"></div>
+
       {/* ===== Main Footer Grid ===== */}
-      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-10">
-        {/* 🌐 About Section */}
-        <div className="space-y-4">
-          <h4 className="text-2xl font-bold bg-gradient-to-r from-orange-400 via-yellow-400 to-blue-500 text-transparent bg-clip-text">
-            CareerFinder+
-          </h4>
-          <p className="text-gray-400 text-sm leading-relaxed">
-            CareerFinder+ helps you explore top colleges, personalized learning
-            paths, and track your skills & achievements. Start your career
-            journey today.
+      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 relative z-10">
+        {/* 🌐 Brand Section */}
+        <div className="space-y-6">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="p-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
+              <Cpu size={20} className="text-cyan-400" />
+            </div>
+            <span className="text-2xl font-bold tracking-tight text-white">
+              CareerFinder<span className="text-cyan-400">.AI</span>
+            </span>
+          </Link>
+          <p className="text-sm leading-relaxed text-slate-500">
+            Utilizing proprietary 6D Competency Models and Cosine Similarity to
+            bridge the guidance gap for students worldwide.
           </p>
 
           {/* Social Links */}
-          <div className="flex gap-4 mt-3">
+          <div className="flex gap-4">
             {[
               { icon: Facebook, color: "hover:text-blue-500" },
               { icon: Twitter, color: "hover:text-sky-400" },
               { icon: Instagram, color: "hover:text-pink-500" },
-              { icon: Linkedin, color: "hover:text-blue-400" },
+              { icon: Linkedin, color: "hover:text-cyan-400" },
             ].map((social, i) => (
               <a
                 key={i}
                 href="#"
-                className={`p-2 bg-gray-800 rounded-full hover:bg-gray-700 transition transform hover:scale-110 ${social.color}`}
+                className={`w-10 h-10 flex items-center justify-center bg-slate-900 border border-slate-800 rounded-xl transition-all duration-300 hover:border-cyan-500/50 hover:-translate-y-1 ${social.color}`}
               >
                 <social.icon size={18} />
               </a>
@@ -40,114 +55,121 @@ function Footer() {
           </div>
         </div>
 
-        {/* ⚡ Quick Links */}
-        <div className="space-y-4">
-          <h4 className="text-lg font-semibold text-white relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-12 after:h-[2px] after:bg-gradient-to-r from-blue-500 to-yellow-400">
-            Quick Links
+        {/* ⚡ Platform Links */}
+        <div className="space-y-6">
+          <h4 className="text-sm font-bold uppercase tracking-widest text-slate-200">
+            Platform
           </h4>
-          <ul className="space-y-2 text-gray-400 text-sm">
+          <ul className="space-y-3 text-sm">
             <li>
-              <Link to="/" className="hover:text-blue-400 transition">
+              <Link to="/" className="hover:text-cyan-400 transition-colors">
                 Home
               </Link>
             </li>
-
-            {!user && (
+            <li>
+              <Link
+                to="/about"
+                className="hover:text-cyan-400 transition-colors"
+              >
+                6D Model Theory
+              </Link>
+            </li>
+            {!user ? (
               <li>
                 <Link
                   to="/register"
-                  className="hover:text-yellow-400 transition"
+                  className="text-cyan-400 font-medium hover:underline"
                 >
-                  Register
+                  Start Aptitude Test
                 </Link>
               </li>
-            )}
-
-            {user && (
+            ) : (
               <li>
                 <Link
-                  to="/dashboard"
-                  className="hover:text-blue-400 transition"
+                  to="/student/dashboard"
+                  className="hover:text-cyan-400 transition-colors"
                 >
-                  Dashboard
+                  My Career Roadmap
                 </Link>
               </li>
             )}
-
             <li>
-              <Link to="/profile" className="hover:text-orange-400 transition">
-                Profile
-              </Link>
-            </li>
-
-            <li>
-              <Link to="/contact" className="hover:text-blue-400 transition">
-                Contact Us
+              <Link
+                to="/privacy"
+                className="hover:text-cyan-400 transition-colors"
+              >
+                Data Privacy
               </Link>
             </li>
           </ul>
         </div>
 
         {/* 📞 Contact Info */}
-        <div className="space-y-4">
-          <h4 className="text-lg font-semibold text-white relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-12 after:h-[2px] after:bg-gradient-to-r from-orange-400 to-blue-400">
-            Contact
+        <div className="space-y-6">
+          <h4 className="text-sm font-bold uppercase tracking-widest text-slate-200">
+            Contact Team
           </h4>
-          <p className="text-gray-400 text-sm hover:text-gray-200 transition">
-            ✉️ Email:{" "}
-            <span className="text-gray-300">support@careerfinder.com</span>
-          </p>
-          <p className="text-gray-400 text-sm hover:text-gray-200 transition">
-            📞 Phone: <span className="text-gray-300">+91 9876543210</span>
-          </p>
-          <p className="text-gray-400 text-sm hover:text-gray-200 transition">
-            📍 Address: Pune, Maharashtra, India
-          </p>
+          <div className="space-y-3 text-sm">
+            <p className="flex items-center gap-3">
+              <span className="text-slate-600">Email:</span>
+              <span className="text-slate-300">support@careerfinder.ai</span>
+            </p>
+            <p className="flex items-center gap-3">
+              <span className="text-slate-600">Location:</span>
+              <span className="text-slate-300">Pune, Maharashtra, India</span>
+            </p>
+            <div className="pt-4 flex items-center gap-2 text-xs text-green-500/80">
+              <ShieldCheck size={14} />
+              <span>Verified AI Recommendations</span>
+            </div>
+          </div>
         </div>
 
-        {/* 📨 Newsletter / CTA */}
-        <div className="space-y-4">
-          <h4 className="text-lg font-semibold text-white relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-12 after:h-[2px] after:bg-gradient-to-r from-yellow-400 to-orange-400">
-            Stay Updated
+        {/* 📨 Newsletter / Security */}
+        <div className="space-y-6">
+          <h4 className="text-sm font-bold uppercase tracking-widest text-slate-200">
+            Join the Loop
           </h4>
-          <p className="text-gray-400 text-sm">
-            Subscribe to our newsletter for career tips and updates.
+          <p className="text-sm text-slate-500">
+            Get the latest career trends and algorithmic updates.
           </p>
 
           <form
             onSubmit={(e) => e.preventDefault()}
-            className="flex flex-col sm:flex-col gap-2"
+            className="flex flex-col gap-2"
           >
-            <input
-              type="email"
-              placeholder="Your email"
-              className="p-3 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1 transition placeholder-gray-500"
-            />
-            <button
-              type="submit"
-              className="px-4 py-3 bg-gradient-to-r from-orange-500 via-yellow-400 to-blue-500 text-gray-900 font-semibold rounded-lg hover:scale-105 transition flex items-center justify-center gap-2 shadow-md hover:shadow-blue-500/40"
-            >
-              Subscribe <Send size={16} />
-            </button>
+            <div className="relative">
+              <input
+                type="email"
+                placeholder="university@email.com"
+                className="w-full p-3 pl-4 rounded-xl bg-slate-900 text-slate-200 border border-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all placeholder:text-slate-700"
+              />
+              <button
+                type="submit"
+                className="absolute right-2 top-1.5 p-1.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg transition-colors group"
+              >
+                <Send
+                  size={16}
+                  className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
+                />
+              </button>
+            </div>
           </form>
         </div>
       </div>
 
       {/* ===== Divider Glow Line ===== */}
-      <div className="mt-12 mb-6 h-[1px] w-full bg-gradient-to-r from-transparent via-blue-500/40 to-transparent"></div>
+      <div className="mt-16 mb-8 h-px w-full bg-slate-900"></div>
 
       {/* ===== Bottom Section ===== */}
-      <div className="text-center text-gray-500 text-sm">
-        <p>
-          © {new Date().getFullYear()}{" "}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-yellow-400 to-orange-400 font-semibold">
-            CareerFinder+
-          </span>{" "}
-          — All Rights Reserved.
-        </p>
-        <p className="mt-1 text-xs text-gray-600">
-          Built with ❤️ for Students & Learners
-        </p>
+      <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs tracking-wide">
+        <div className="text-slate-600">
+          © 2026{" "}
+          <span className="text-slate-400 font-semibold">Career Finder</span> —
+          Developed by{" "}
+          <span className="text-cyan-500/80">Career Finder Team</span> For —
+          Students
+        </div>
       </div>
     </footer>
   );

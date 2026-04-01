@@ -150,7 +150,7 @@ const Profile = () => {
                   src={
                     avatarPreview ||
                     profile.avatar ||
-                    "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+                    "https://miro.medium.com/v2/1*LqClB-Wa__W9WrNqP74I3Q.jpeg"
                   }
                   alt="Identity"
                   className="-rotate-45 scale-150 w-full h-full object-cover transition-transform group-hover:scale-[1.6]"

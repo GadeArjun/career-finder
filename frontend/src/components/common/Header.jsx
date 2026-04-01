@@ -38,7 +38,7 @@ function Header({ title }) {
         >
           <div className="w-9 h-9 rounded-full overflow-hidden ring-2 ring-blue-500/50">
             <img
-              src="https://randomuser.me/api/portraits/men/75.jpg"
+              src="https://miro.medium.com/v2/1*LqClB-Wa__W9WrNqP74I3Q.jpeg"
               className="w-full h-full object-cover"
               alt="profile"
             />

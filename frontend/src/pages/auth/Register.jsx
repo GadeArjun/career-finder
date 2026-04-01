@@ -1,6 +1,16 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import {
+  Cpu,
+  UserPlus,
+  ShieldCheck,
+  ArrowRight,
+  UserCircle,
+  Mail,
+  Lock,
+  Briefcase,
+} from "lucide-react";
 
 function Register() {
   const navigate = useNavigate();
@@ -23,135 +33,208 @@ function Register() {
     setLoading(true);
     setError("");
     try {
-      const res = await axios.post(
+      await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/api/users/register`,
         formData
       );
       setLoading(false);
-      navigate("/login"); // redirect after registration
+      navigate("/login");
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.message || "Registration failed");
+      setError(
+        err.response?.data?.message ||
+          "Registration failed. System capacity reached or invalid data."
+      );
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-gray-950 via-gray-900 to-gray-900 text-gray-100 font-poppins">
+    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 font-poppins relative overflow-hidden">
+      {/* ===== Background Aesthetic ===== */}
+      <div className="absolute top-0 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-[120px] -z-10 animate-pulse"></div>
+      <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-[120px] -z-10"></div>
+
       {/* ===== Header ===== */}
-      <header className="w-full backdrop-blur-md bg-gray-900/60 border-b border-blue-500/20 shadow-md py-4 px-6 flex justify-between items-center">
+      <header className="w-full backdrop-blur-md bg-slate-950/60 border-b border-white/5 py-4 px-8 flex justify-between items-center z-50">
+        <Link to="/" className="flex items-center gap-2 group">
+          <div className="p-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/20 group-hover:border-cyan-400 transition-colors">
+            <Cpu size={20} className="text-cyan-400" />
+          </div>
+          <span className="text-2xl font-bold tracking-tight text-white">
+            CareerFinder<span className="text-cyan-400">.AI</span>
+          </span>
+        </Link>
         <Link
-          to={"/"}
-          className="font-bold text-2xl bg-gradient-to-r from-blue-400 via-yellow-400 to-orange-500 bg-clip-text text-transparent drop-shadow-md"
+          to="/login"
+          className="text-xs font-mono text-slate-500 hover:text-cyan-400 transition-colors"
         >
-          CareerGuide+
+          ALREADY_REGISTERED?
         </Link>
       </header>
 
       {/* ===== Main Form ===== */}
-      <main className="flex flex-1 justify-center items-center p-6 relative">
-        {/* Background glowing orbs */}
-        <div className="absolute w-72 h-72 bg-blue-600/30 rounded-full blur-3xl top-16 left-10 animate-pulse"></div>
-        <div className="absolute w-64 h-64 bg-orange-500/20 rounded-full blur-3xl bottom-16 right-10 animate-pulse"></div>
-
-        {/* Form Card */}
-        <div className="w-full max-w-md bg-gradient-to-br from-gray-800/90 via-blue-900/40 to-gray-900 border border-blue-500/20 rounded-2xl shadow-lg backdrop-blur-md p-8 flex flex-col gap-6 hover:shadow-blue-400/30 transition-all duration-300 transform hover:-translate-y-1">
-          <h2 className="text-3xl font-semibold text-center bg-gradient-to-r from-blue-400 via-yellow-400 to-orange-500 bg-clip-text text-transparent">
-            Create an Account
-          </h2>
-
-          {error && (
-            <div className="bg-gradient-to-r from-red-600 to-red-500 text-white text-sm p-2 rounded-md shadow-md text-center">
-              {error}
-            </div>
-          )}
-
-          <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
-            {/* Full Name */}
-            <div className="flex flex-col">
-              <label className="mb-1 text-gray-300 font-medium tracking-wide">
-                Full Name
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="John Doe"
-                required
-                className="p-3 rounded-lg bg-gray-900/80 border border-gray-700 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none placeholder-gray-400 text-gray-100 transition-all duration-200"
-              />
+      <main className="flex flex-1 justify-center items-center p-6 relative z-10">
+        <div className="w-full max-w-lg">
+          {/* Form Card */}
+          <div className="bg-slate-900/50 border border-slate-800 rounded-[2.5rem] p-8 md:p-10 shadow-2xl backdrop-blur-xl">
+            <div className="text-center mb-8 space-y-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold uppercase tracking-widest mb-2">
+                <UserPlus size={12} /> Initialize Profile
+              </div>
+              <h2 className="text-3xl font-bold text-white tracking-tight">
+                Create Vector Profile
+              </h2>
+              <p className="text-slate-500 text-sm max-w-xs mx-auto">
+                Join the platform to unlock your personalized 6D Competency
+                Roadmap.
+              </p>
             </div>
 
-            {/* Email */}
-            <div className="flex flex-col">
-              <label className="mb-1 text-gray-300 font-medium tracking-wide">
-                Email
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="you@example.com"
-                required
-                className="p-3 rounded-lg bg-gray-900/80 border border-gray-700 focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none placeholder-gray-400 text-gray-100 transition-all duration-200"
-              />
-            </div>
+            {error && (
+              <div className="mb-6 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs text-center font-medium">
+                {error}
+              </div>
+            )}
 
-            {/* Password */}
-            <div className="flex flex-col">
-              <label className="mb-1 text-gray-300 font-medium tracking-wide">
-                Password
-              </label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="********"
-                required
-                className="p-3 rounded-lg bg-gray-900/80 border border-gray-700 focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none placeholder-gray-400 text-gray-100 transition-all duration-200"
-              />
-            </div>
-
-            {/* Role */}
-            <div className="flex flex-col">
-              <label className="mb-1 text-gray-300 font-medium tracking-wide">
-                Role
-              </label>
-              <select
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                className="p-3 rounded-lg bg-gray-900/80 border border-gray-700 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 text-gray-100 transition-all duration-200 outline-none"
-              >
-                <option value="student">Student</option>
-                <option value="college">College</option>
-                <option value="company">Company</option>
-              </select>
-            </div>
-
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="mt-2 px-4 py-3 bg-gradient-to-r from-blue-600 via-yellow-400 to-orange-500 text-white rounded-lg font-semibold tracking-wide shadow-md hover:shadow-lg hover:scale-[1.02] transition-all duration-300 disabled:opacity-60"
+            <form
+              className="grid grid-cols-1 md:grid-cols-2 gap-5"
+              onSubmit={handleSubmit}
             >
-              {loading ? "Creating..." : "Register"}
-            </button>
-          </form>
+              {/* Full Name */}
+              <div className="space-y-1.5 md:col-span-2">
+                <label className="text-xs font-bold uppercase tracking-widest text-slate-400 ml-1">
+                  Legal Name
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="John Doe"
+                    required
+                    className="w-full p-4 pl-12 rounded-2xl bg-slate-950 border border-slate-800 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/10 outline-none text-slate-100 transition-all"
+                  />
+                  <UserCircle
+                    className="absolute left-4 top-4 text-slate-700"
+                    size={18}
+                  />
+                </div>
+              </div>
 
-          {/* Footer */}
-          <p className="text-gray-400 text-sm text-center mt-2">
-            Already have an account?{" "}
-            <Link
-              to="/login"
-              className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent hover:underline font-semibold"
-            >
-              Login
-            </Link>
-          </p>
+              {/* Email */}
+              <div className="space-y-1.5 md:col-span-2">
+                <label className="text-xs font-bold uppercase tracking-widest text-slate-400 ml-1">
+                  Academic/Work Email
+                </label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="name@university.edu"
+                    required
+                    className="w-full p-4 pl-12 rounded-2xl bg-slate-950 border border-slate-800 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/10 outline-none text-slate-100 transition-all"
+                  />
+                  <Mail
+                    className="absolute left-4 top-4 text-slate-700"
+                    size={18}
+                  />
+                </div>
+              </div>
+
+              {/* Password */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold uppercase tracking-widest text-slate-400 ml-1">
+                  Access Key
+                </label>
+                <div className="relative">
+                  <input
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="********"
+                    required
+                    className="w-full p-4 pl-12 rounded-2xl bg-slate-950 border border-slate-800 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/10 outline-none text-slate-100 transition-all"
+                  />
+                  <Lock
+                    className="absolute left-4 top-4 text-slate-700"
+                    size={18}
+                  />
+                </div>
+              </div>
+
+              {/* Role */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold uppercase tracking-widest text-slate-400 ml-1">
+                  System Role
+                </label>
+                <div className="relative">
+                  <select
+                    name="role"
+                    value={formData.role}
+                    onChange={handleChange}
+                    className="w-full p-4 pl-12 rounded-2xl bg-slate-950 border border-slate-800 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/10 outline-none text-slate-100 transition-all appearance-none cursor-pointer"
+                  >
+                    <option value="student">Student / Learner</option>
+                    <option value="college">College / Academic</option>
+                    <option value="company">Company / HR</option>
+                  </select>
+                  <Briefcase
+                    className="absolute left-4 top-4 text-slate-700"
+                    size={18}
+                  />
+                </div>
+              </div>
+
+              {/* Submit */}
+              <div className="md:col-span-2 pt-4">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-bold shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 group"
+                >
+                  {loading ? (
+                    <span className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      Generating Profile...
+                    </span>
+                  ) : (
+                    <>
+                      Register & Begin Assessment{" "}
+                      <ArrowRight
+                        size={18}
+                        className="group-hover:translate-x-1 transition-transform"
+                      />
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+
+            <div className="mt-8 pt-6 border-t border-slate-800 text-center">
+              <p className="text-slate-500 text-sm">
+                Already have a profile?{" "}
+                <Link
+                  to="/login"
+                  className="text-indigo-400 font-bold hover:text-indigo-300 transition-colors"
+                >
+                  Login to System
+                </Link>
+              </p>
+            </div>
+          </div>
+
+          {/* Security Note */}
+          <div className="mt-8 flex items-center justify-center gap-4 text-[10px] font-mono text-slate-600 uppercase tracking-widest">
+            <div className="flex items-center gap-1.5">
+              <ShieldCheck size={12} className="text-green-500/50" />
+              AES-256 Encrypted
+            </div>
+          </div>
         </div>
       </main>
     </div>

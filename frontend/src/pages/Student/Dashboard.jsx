@@ -101,9 +101,6 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // AbortController to prevent state updates on unmounted components
-    const abortController = new AbortController();
-
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
@@ -112,15 +109,12 @@ const Dashboard = () => {
           `${import.meta.env.VITE_BACKEND_URL}/api/student/dashboard`,
           {
             headers: { Authorization: `Bearer ${user.token}` },
-            signal: abortController.signal,
           }
         );
         setData(response.data.data);
       } catch (err) {
-        if (!axios.isCancel(err)) {
-          console.error("Critical Engine Failure:", err);
-          setError("DATA_LOAD_FAILED");
-        }
+        console.error("Critical Engine Failure:", err);
+        setError("DATA_LOAD_FAILED");
       } finally {
         setLoading(false);
       }
@@ -132,8 +126,6 @@ const Dashboard = () => {
       setLoading(false);
       setError("UNAUTHORIZED_ACCESS");
     }
-
-    return () => abortController.abort();
   }, [user]);
 
   const radarData = useMemo(() => {
@@ -157,7 +149,7 @@ const Dashboard = () => {
 
   if (loading) return <DashboardSkeleton />;
 
-  if (error || !data)
+  if (error || (!data && !loading))
     return (
       <div className="min-h-screen bg-[#020617] text-slate-100 flex flex-col justify-center items-center font-mono p-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(226,54,54,0.05)_0,rgba(0,0,0,0)_50%)] pointer-events-none" />
@@ -726,7 +718,7 @@ const RecommendationItem = ({ item, index }) => (
 );
 
 const DashboardSkeleton = () => (
-  <div className="min-h-screen bg-[#020617] p-6 pt-24 max-w-7xl mx-auto space-y-12">
+  <div className="min-h-screen bg-[#020617] p-6 pt-24 max-w-full mx-auto space-y-12">
     <div className="flex justify-between items-end mb-8">
       <div className="space-y-4">
         <div className="h-4 w-32 bg-slate-800/50 rounded-md animate-pulse" />
