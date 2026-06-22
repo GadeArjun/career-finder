@@ -537,7 +537,6 @@ exports.getTestById = async (req, res) => {
 exports.getAllTests = async (req, res) => {
   try {
     const { page = 1, limit = 20, isActive, category } = req.query;
-    console.log("come here")
 
     const query = {};
 

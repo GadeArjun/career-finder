@@ -16,7 +16,6 @@ exports.createJob = async (req, res) => {
         "-" +
         Date.now().toString().slice(-4);
     }
-    console.log(data);
 
     data.companyId = data.companyId; // from auth middleware
     data.recruiterId = req.user._id;
@@ -29,7 +28,7 @@ exports.createJob = async (req, res) => {
       job,
     });
   } catch (error) {
-    console.log({ error });
+    console.error({ error });
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -42,7 +41,6 @@ exports.updateJob = async (req, res) => {
     const { id } = req.params;
 
     const job = await Job.findById(id);
-    console.log(job);
     if (!job)
       return res.status(404).json({ success: false, message: "Job not found" });
 
@@ -54,7 +52,7 @@ exports.updateJob = async (req, res) => {
       job: updatedJob,
     });
   } catch (error) {
-    console.log({ error });
+    console.error({ error });
     res.status(500).json({ success: false, message: error.message });
   }
 };
