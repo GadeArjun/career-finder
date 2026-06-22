@@ -435,7 +435,7 @@ const Dashboard = () => {
                 Activity Feed
               </h3>
               <Link
-                to="/student/history"
+                to="/student/recommendations"
                 className="text-xs text-slate-400 hover:text-white transition-colors uppercase tracking-widest font-bold"
               >
                 View All

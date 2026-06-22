@@ -173,7 +173,7 @@ export const CollegeProvider = ({ children }) => {
      🔹 Auto-fetch on mount (if user)
   ---------------------------------------------------------- */
   useEffect(() => {
-    if (user?.role === "college" || user?.role === "admin") {
+    if (user?.role === "college") {
       fetchColleges();
     }
   }, [user, token]);

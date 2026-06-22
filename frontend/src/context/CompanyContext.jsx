@@ -153,7 +153,7 @@ export const CompanyProvider = ({ children }) => {
      🔹 Auto Load for Company/Admin
   ---------------------------------------------------------- */
   useEffect(() => {
-    if (user?.role === "company" || user?.role === "admin") {
+    if (user?.role === "company") {
       fetchCompanies();
     }
   }, [user, token]);

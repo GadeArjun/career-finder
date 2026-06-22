@@ -15,6 +15,7 @@ const testRoutes = require("./routes/test.routes");
 const { recommendationRouter } = require("./routes/recommendationRoutes");
 const Course = require("./models/Course");
 const { getYouTubeCourses } = require("./services/youtube.service");
+const testAdminRoutes = require("./routes/test.admin.routes")
 const {
   getDashboardInsights,
 } = require("./controllers/studentDashboard.controller");
@@ -49,6 +50,7 @@ app.use("/api/company", companyRouter);
 app.use("/api/job", jobRouter);
 app.use("/api/course", courseRoutes);
 app.use("/api/tests", testRoutes);
+app.use("/api/admin/test",testAdminRoutes)
 app.use("/api/recommendation", recommendationRouter);
 app.get("/api/student/dashboard", protect, getDashboardInsights);
 app.post("/api/ai/chat", protect, chat);

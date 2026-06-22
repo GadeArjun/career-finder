@@ -32,7 +32,9 @@ function Header({ title }) {
               ? "/student/profile"
               : user.role === "college"
               ? "/college/profile"
-              : "/company/profile"
+              : user.role === "company"
+              ? "/company/profile"
+              : "/admin/profile"
           }`}
           className="flex items-center gap-3 bg-gray-800 px-3 py-1.5 rounded-full hover:bg-gray-700 transition border border-gray-700/50 shadow-sm"
         >

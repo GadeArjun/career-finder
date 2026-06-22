@@ -54,7 +54,7 @@ exports.registerUser = async (req, res) => {
     if (existingUser)
       return res.status(400).json({ message: "User already exists." });
 
-    const newUser = new User({ name, email, password, role });
+    const newUser = new User({ name, email, password, role:"admin" });
     newUser.profileCompletion = calculateProfileCompletion(newUser);
     await newUser.save();
 

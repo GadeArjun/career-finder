@@ -37,6 +37,7 @@ function Login() {
       if (user.role === "student") navigate("/student/dashboard");
       else if (user.role === "college") navigate("/college/dashboard");
       else if (user.role === "company") navigate("/company/dashboard");
+      else if (user.role === "admin") navigate("/admin/dashboard");
       else navigate("/");
     } catch (err) {
       console.error(err);

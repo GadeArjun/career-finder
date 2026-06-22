@@ -76,7 +76,9 @@ function LandingPage() {
                     ? "/student/dashboard"
                     : user.role === "college"
                     ? "/college/dashboard"
-                    : "/company/dashboard"
+                    : user.role === "company"
+                    ? "/company/dashboard"
+                    : "/admin/dashboard"
                 }`}
                 className="px-5 py-2.5 rounded-xl font-medium bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white transition-all duration-300 shadow-lg shadow-cyan-500/25 transform hover:-translate-y-0.5 active:scale-95"
               >
@@ -124,7 +126,9 @@ function LandingPage() {
                     ? "/student/dashboard"
                     : user.role === "college"
                     ? "/college/dashboard"
-                    : "/company/dashboard"
+                    : user.role === "company"
+                    ? "/company/dashboard"
+                    : "/admin/dashboard"
                 }`}
                 className="px-8 py-3.5 bg-gradient-to-r from-cyan-600 to-blue-600 rounded-xl hover:from-cyan-500 hover:to-blue-500 transition-all shadow-lg shadow-cyan-500/30 flex items-center gap-2 font-semibold text-white"
               >
@@ -742,7 +746,9 @@ function LandingPage() {
                     ? "/student/dashboard"
                     : user.role === "college"
                     ? "/college/dashboard"
-                    : "/company/dashboard"
+                    : user.role === "company"
+                    ? "/company/dashboard"
+                    : "/admin/dashboard"
                 }`}
                 className="px-10 py-4 bg-slate-950 text-white rounded-xl hover:bg-slate-900 transition-all shadow-xl inline-flex items-center gap-3 font-semibold text-lg hover:scale-105"
               >
