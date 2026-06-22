@@ -9,6 +9,7 @@ import {
   X,
   Compass,
   GraduationCap,
+  UserCog2Icon,
 } from "lucide-react";
 import { Link, NavLink } from "react-router-dom";
 import { useUserContext } from "../../context/UserContext";
@@ -79,6 +80,27 @@ const Sidebar = () => {
     },
   ];
 
+  const adminMenuItems = [
+    { name: "Dashboard", icon: <Home size={20} />, path: "/admin/dashboard" },
+    {
+      name: "User Management",
+      icon: <UserCog2Icon size={20} />,
+      path: "/admin/users",
+    },
+    {
+      name: "Tests Management",
+      icon: <UserCog2Icon size={20} />,
+      path: "/admin/tests",
+    },
+
+    { name: "My Profile", icon: <User size={20} />, path: "/admin/profile" },
+    {
+      name: "Settings",
+      icon: <Settings size={20} />,
+      path: "/admin/settings",
+    },
+  ];
+
   const menuItems =
     user.role === "student"
       ? studentMenuItems
@@ -86,6 +108,8 @@ const Sidebar = () => {
       ? collegeMenuItems
       : user.role === "company"
       ? companyMenuItems
+      : user.role === "admin"
+      ? adminMenuItems
       : studentMenuItems;
 
   return (
