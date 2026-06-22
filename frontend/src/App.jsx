@@ -29,6 +29,8 @@ import CourseEditor from "./pages/Course/CourseEditor";
 import JobDetailView from "./pages/Job/JobDetailView";
 import CourseDetailView from "./pages/Course/CourseDetailView";
 import AdminTestManagementPage from "./pages/admin/AdminTestManagementPage";
+import AdminUserManagementPage from "./pages/admin/AdminUserManagementPage";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 
 export default function App() {
   const { user } = useUserContext();
@@ -141,7 +143,9 @@ export default function App() {
 
         {user && user.role === "admin" && (
           <Route path="/admin" element={<Layout />}>
-            <Route path="dashboard" element={<AdminTestManagementPage />} />
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="users" element={<AdminUserManagementPage />} />
+            <Route path="tests" element={<AdminTestManagementPage />} />
           </Route>
         )}
 

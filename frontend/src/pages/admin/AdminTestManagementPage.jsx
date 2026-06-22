@@ -48,7 +48,6 @@ import {
 */
 
 const API_BASE = import.meta.env.VITE_BACKEND_URL + "/api/admin/test";
-console.log({API_BASE})
 
 const TEST_CATEGORIES = [
   "Aptitude",
@@ -1194,7 +1193,7 @@ export default function AdminTestManagementPage() {
           </div>
         ) : null}
 
-        <div className="grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
+        <div className="">
           <div>
             <div className="mb-4 flex items-center justify-between">
               <div>
@@ -1242,12 +1241,13 @@ export default function AdminTestManagementPage() {
                 onHardDelete={handleHardDeleteFromPanel}
               />
             ) : (
-              <div className="flex h-full min-h-[500px] items-center justify-center rounded-3xl border border-dashed border-slate-800 bg-slate-900/40 p-10 text-center text-slate-500">
-                <div>
-                  <Eye className="mx-auto mb-3 h-8 w-8 text-slate-600" />
-                  <p className="text-sm">Select a test to open its full details.</p>
-                </div>
-              </div>
+              null
+              // <div className="flex h-full min-h-[500px] items-center justify-center rounded-3xl border border-dashed border-slate-800 bg-slate-900/40 p-10 text-center text-slate-500">
+              //   <div>
+              //     <Eye className="mx-auto mb-3 h-8 w-8 text-slate-600" />
+              //     <p className="text-sm">Select a test to open its full details.</p>
+              //   </div>
+              // </div>
             )}
           </AnimatePresence>
         </div>

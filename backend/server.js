@@ -16,6 +16,7 @@ const { recommendationRouter } = require("./routes/recommendationRoutes");
 const Course = require("./models/Course");
 const { getYouTubeCourses } = require("./services/youtube.service");
 const testAdminRoutes = require("./routes/test.admin.routes")
+const userAdminRoutes = require("./routes/user.admin.routes");
 const {
   getDashboardInsights,
 } = require("./controllers/studentDashboard.controller");
@@ -43,6 +44,7 @@ app.use(express.static(path.join(__dirname, "public", "dist")));
 
 // Routes
 app.use("/api/users", userRouter);
+app.use("/api/admin/users", userAdminRoutes);
 app.use("/api/college", collegeRouter);
 app.use("/api/courses", courseRouter);
 app.use("/api/learning-paths", learningPathRouter);

@@ -561,7 +561,7 @@ exports.getAllTests = async (req, res) => {
         .populate("createdBy", "name email role")
         .sort({ createdAt: -1 })
         .skip(skip)
-        .limit(limitNum)
+        // .limit(limitNum)
         .lean(),
 
       Test.countDocuments(query),
