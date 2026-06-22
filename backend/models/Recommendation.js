@@ -70,7 +70,6 @@ const RecommendationSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "TestResult",
       required: true,
-      index: true,
     },
 
     /* ------------------------------------------------------------------
@@ -218,6 +217,11 @@ RecommendationSchema.methods.markStale = async function () {
    ⏳ TTL Index (Auto Delete Expired Docs)
 -------------------------------------------------------------------*/
 RecommendationSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+
+RecommendationSchema.index({
+  userId: 1,
+  createdAt: -1,
+});
 
 /* ------------------------------------------------------------------
    ✅ Export

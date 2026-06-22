@@ -10,7 +10,7 @@ import { JobProvider } from "./context/JobContext.jsx";
 import { CourseProvider } from "./context/CourseContext.jsx";
 
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
+  // <StrictMode>
     <UserProvider>
       <CollegeProvider>
         <CourseProvider>
@@ -22,5 +22,5 @@ createRoot(document.getElementById("root")).render(
         </CourseProvider>
       </CollegeProvider>
     </UserProvider>
-  </StrictMode>
+  // </StrictMode>
 );

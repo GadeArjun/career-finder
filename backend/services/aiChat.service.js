@@ -126,6 +126,18 @@ You guide user based on there 6D Competency score which is Analytical, Verbal, C
 - Generate 3–5 follow-up questions, start with verbs like: Show, Explain, Give, Suggest
 - Avoid reflective questions ("what do you think...?", "are you interested...?")
 
+📌 MESSAGE FIELD REQUIREMENTS:
+- Provide a **detailed, point-wise response** covering the user's questions, profile, and latest test feedback
+- Summarize **strengths and weaknesses** clearly
+- Include recommended **courses and jobs** in concise points
+- Offer **actionable guidance** for skill improvement and career steps
+- Keep it **comprehensive yet readable**, using short bullet points or numbered points
+- The message itself should be fully informative
+
+💡 Example structure for message:
+1. Here What user exact expeted.
+2. Test insights: You answered 3/10 questions incorrectly in the last assessment; focus on analytical reasoning and problem-solving questions.
+
 `;
 
   // USER MESSAGE
