@@ -6,8 +6,8 @@ export default function RecentTestsTable({ tests }) {
             Recent Tests
           </h2>
         </div>
-  
-        <table className="w-full">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[700px]">
           <thead>
             <tr className="text-slate-400 text-left">
               <th className="p-4">Title</th>
@@ -35,6 +35,7 @@ export default function RecentTestsTable({ tests }) {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     );
   }

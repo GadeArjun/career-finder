@@ -36,6 +36,8 @@ import {
   ToggleLeft,
   ToggleRight,
 } from "lucide-react";
+import SectionCard from "../../components/admin/dashboard/SectoinCard";
+import PreviewLine from "../../components/admin/dashboard/PreviewLine";
 
 const API_BASE = import.meta.env.VITE_BACKEND_URL +  "/api/admin/users";
 
@@ -1482,7 +1484,7 @@ export default function AdminUserManagementPage() {
               )}
             </div>
 
-            <div className="mt-6 flex items-center justify-between rounded-[2rem] border border-slate-800 bg-slate-900/70 px-4 py-3">
+            {/* <div className="mt-6 flex items-center justify-between rounded-[2rem] border border-slate-800 bg-slate-900/70 px-4 py-3">
               <Button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page <= 1}
@@ -1507,7 +1509,7 @@ export default function AdminUserManagementPage() {
               >
                 Next
               </Button>
-            </div>
+            </div> */}
           </div>
 
           <AnimatePresence>

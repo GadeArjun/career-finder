@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 
 export default function RecentUsersTable({ users }) {
   return (
@@ -9,30 +8,32 @@ export default function RecentUsersTable({ users }) {
         </h2>
       </div>
 
-      <table className="w-full">
-        <thead>
-          <tr className="text-slate-400 text-left">
-            <th className="p-4">Name</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {users.map((user) => (
-            <tr
-              key={user._id}
-              className="border-t border-slate-800"
-            >
-              <td className="p-4">{user.name}</td>
-              <td>{user.email}</td>
-              <td>{user.role}</td>
-              <td>{user.status}</td>
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[700px]">
+          <thead>
+            <tr className="text-slate-400 text-left">
+              <th className="p-4">Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Status</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+
+          <tbody>
+            {users.map((user) => (
+              <tr
+                key={user._id}
+                className="border-t border-slate-800"
+              >
+                <td className="p-4">{user.name}</td>
+                <td>{user.email}</td>
+                <td>{user.role}</td>
+                <td>{user.status}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
