@@ -19,59 +19,29 @@ const router = express.Router();
 ========================================================= */
 
 // Create Test
-router.post(
-  "/",
-  protect,
-  authorize("admin", "SuperAdmin"),
-  createTest
-);
+router.post("/", protect, authorize("admin"), createTest);
 
 // Get All Tests
-router.get(
-  "/",
-  protect,
-  authorize("admin", "SuperAdmin"),
-  getAllTests
-);
+router.get("/", protect, authorize("admin"), getAllTests);
 
 // Get Single Test
-router.get(
-  "/:testId",
-  protect,
-  authorize("admin", "SuperAdmin"),
-  getTestById
-);
+router.get("/:testId", protect, authorize("admin"), getTestById);
 
 // Update Test
-router.put(
-  "/:testId",
-  protect,
-  authorize("admin", "SuperAdmin"),
-  updateTest
-);
+router.put("/:testId", protect, authorize("admin"), updateTest);
 
 // Soft Delete Test
 router.patch(
   "/:testId/soft-delete",
   protect,
-  authorize("admin", "SuperAdmin"),
+  authorize("admin"),
   softDeleteTest
 );
 
 // Restore Test
-router.patch(
-  "/:testId/restore",
-  protect,
-  authorize("admin", "SuperAdmin"),
-  restoreTest
-);
+router.patch("/:testId/restore", protect, authorize("admin"), restoreTest);
 
 // Hard Delete Test
-router.delete(
-  "/:testId",
-  protect,
-  authorize("SuperAdmin"),
-  deleteTest
-);
+router.delete("/:testId", protect, authorize("admin"), deleteTest);
 
 module.exports = router;
